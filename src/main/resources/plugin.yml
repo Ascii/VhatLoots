@@ -1,0 +1,7 @@
+name: VhatLoots
+version: ${project.version}
+main: de.articdive.vhatloots.VhatLoots
+api-version: 1.13
+authors: [Articdive]
+description: A recreation of PhatLoots for modern minecraft versions.
+website: https://www.articdive.de

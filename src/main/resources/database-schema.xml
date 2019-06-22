@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE databaseChangeLog [
+        <!ENTITY players "/PLAYERS/">
+        <!ENTITY containers "/CONTAINERS/">
+        ]>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd">
+    <changeSet author="Articdive" id="1">
+
+        <createTable tableName="&players;">
+            <column name="uuid" type="VARCHAR(36)">
+                <constraints unique="true" nullable="false" primaryKey="true"/>
+            </column>
+            <column name="language" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+        <createTable tableName="&containers;">
+            <column name="uuid" type="VARCHAR(36)">
+                <constraints unique="true" nullable="false" primaryKey="true"/>
+            </column>
+            <column name="name" type="VARCHAR(32)">
+                <constraints unique="true" nullable="false" primaryKey="true"/>
+            </column>
+            <column name="world" type="VARCHAR(36)">
+                <constraints unique="false" nullable="false"/>
+            </column>
+            <column name="x" type="INTEGER">
+                <constraints unique="false" nullable="false"/>
+            </column>
+            <column name="y" type="INTEGER">
+                <constraints unique="false" nullable="false"/>
+            </column>
+            <column name="z" type="INTEGER">
+                <constraints unique="false" nullable="false"/>
+            </column>
+            <column name="cooldowns" type="LONGTEXT">
+                <constraints unique="false" nullable="true"/>
+            </column>
+            <column name="parent" type="VARCHAR(255)">
+                <constraints unique="false" nullable="true"/>
+            </column>
+        </createTable>
+
+    </changeSet>
+</databaseChangeLog>
