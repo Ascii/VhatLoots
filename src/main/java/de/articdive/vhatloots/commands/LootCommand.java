@@ -28,12 +28,12 @@ import co.aikar.commands.annotation.HelpCommand;
 import co.aikar.commands.annotation.Optional;
 import co.aikar.commands.annotation.Subcommand;
 import co.aikar.commands.annotation.Syntax;
-import de.articdive.vhatloots.configuration.gson.LootHandler;
-import de.articdive.vhatloots.configuration.gson.objects.Loot;
-import de.articdive.vhatloots.configuration.gson.objects.CollectionLoot;
-import de.articdive.vhatloots.configuration.gson.objects.ItemLoot;
-import de.articdive.vhatloots.configuration.gson.objects.MoneyLoot;
-import de.articdive.vhatloots.configuration.gson.objects.XPLoot;
+import de.articdive.vhatloots.configuration.loot.LootHandler;
+import de.articdive.vhatloots.configuration.loot.objects.ItemLoot;
+import de.articdive.vhatloots.configuration.loot.objects.LootCollection;
+import de.articdive.vhatloots.configuration.loot.objects.LootConfiguration;
+import de.articdive.vhatloots.configuration.loot.objects.MoneyLoot;
+import de.articdive.vhatloots.configuration.loot.objects.XPLoot;
 import de.articdive.vhatloots.helpers.MessageHelper;
 import de.articdive.vhatloots.language.LanguageConfigurationNode;
 import de.articdive.vhatloots.objects.LootContainer;
@@ -65,36 +65,36 @@ public class LootCommand extends VhatLootsBaseCommand {
     @Syntax("<lootName>")
     @CommandPermission("vhatloots.create")
     public void onCreate(CommandSender sender, String lootName) {
-        HashMap<String, String> localPlaceHolders = new HashMap<>();
+        HashMap<String, Object> localPlaceHolders = new HashMap<>();
         localPlaceHolders.put("lootName", lootName);
         if (lootHandler.exists(lootName)) {
             sender.sendMessage(formatMsg(localPlaceHolders, getMessage(sender, LanguageConfigurationNode.LOOT_EXISTS)));
             return;
         }
-        lootHandler.addLootConfiguration(new Loot(lootName));
-        lootHandler.update();
+        lootHandler.addLootConfiguration(new LootConfiguration(lootName));
+        lootHandler.update(true);
         sender.sendMessage(formatMsg(localPlaceHolders, getMessage(sender, LanguageConfigurationNode.LOOT_CREATED)));
     }
     
     @Subcommand("delete|remove")
     @Syntax("<lootName>")
     @CommandPermission("vhatloots.delete")
-    @CommandCompletion("@loot")
-    public void onDelete(CommandSender sender, Loot loot) {
-        HashMap<String, String> localPlaceHolders = new HashMap<>();
-        localPlaceHolders.put("lootName", loot.getName());
-        lootHandler.removeLootConfiguration(loot);
-        lootHandler.update();
+    @CommandCompletion("@loot-configurations ")
+    public void onDelete(CommandSender sender, LootConfiguration lootConfiguration) {
+        HashMap<String, Object> localPlaceHolders = new HashMap<>();
+        localPlaceHolders.put("lootName", lootConfiguration.getName());
+        lootHandler.removeLootConfiguration(lootConfiguration);
+        lootHandler.update(true);
         sender.sendMessage(formatMsg(localPlaceHolders, getMessage(sender, LanguageConfigurationNode.LOOT_DELETED)));
     }
     
     @Subcommand("link")
     @Syntax("<lootName> <containerName>")
     @CommandPermission("vhatloots.link")
-    @CommandCompletion("@loot *")
-    public void onLink(Player player, Loot loot, String containerName) {
-        HashMap<String, String> localPlaceHolders = new HashMap<>();
-        localPlaceHolders.put("lootName", loot.getName());
+    @CommandCompletion("@loot-configurations *")
+    public void onLink(Player player, LootConfiguration lootConfiguration, String containerName) {
+        HashMap<String, Object> localPlaceHolders = new HashMap<>();
+        localPlaceHolders.put("lootName", lootConfiguration.getName());
         localPlaceHolders.put("containerName", containerName);
         
         if (LootContainer.exists(containerName)) {
@@ -109,7 +109,7 @@ public class LootCommand extends VhatLootsBaseCommand {
             Block b = result.getHitBlock();
             BlockState bs = b.getState();
             if (bs instanceof Container) {
-                if (LootContainer.add(UUID.randomUUID(), containerName, b.getWorld().getUID(), b.getX(), b.getY(), b.getZ(), loot.getName())) {
+                if (LootContainer.add(UUID.randomUUID(), containerName, b.getWorld().getUID(), b.getX(), b.getY(), b.getZ(), lootConfiguration.getName())) {
                     player.sendMessage(formatMsg(localPlaceHolders, getMessage(player, LanguageConfigurationNode.LOOTBOX_CREATED)));
                 } else {
                     player.sendMessage(formatMsg(localPlaceHolders, getMessage(player, LanguageConfigurationNode.LOOT_FAILED_LINK)));
@@ -127,25 +127,25 @@ public class LootCommand extends VhatLootsBaseCommand {
         if (page == 0) {
             page = 1;
         }
-        List<Loot> loot = lootHandler.getAll();
-        int maxPage = (int) Math.ceil(loot.size() / 8.0);
+        List<LootConfiguration> lootConfiguration = lootHandler.getAll();
+        int maxPage = (int) Math.ceil(lootConfiguration.size() / 8.0);
         if (maxPage == 0) {
             maxPage = 1;
         }
-        HashMap<String, String> localPlaceHolders = new HashMap<>();
-        localPlaceHolders.put("page", String.valueOf(page));
-        localPlaceHolders.put("maxPage", String.valueOf(maxPage));
+        HashMap<String, Object> localPlaceHolders = new HashMap<>();
+        localPlaceHolders.put("page", page);
+        localPlaceHolders.put("maxPage", maxPage);
         List<String> msg = new ArrayList<>();
         msg.add(formatMsg(localPlaceHolders, getMessage(sender, LanguageConfigurationNode.LOOT_HEADER)));
-        for (int i = (page - 1) * 8; i < loot.size(); i++) {
+        for (int i = (page - 1) * 8; i < lootConfiguration.size(); i++) {
             if (i > page * 8 - 1) {
                 break;
             }
-            Loot lut = loot.get(i);
+            LootConfiguration lut = lootConfiguration.get(i);
             localPlaceHolders.put("lootName", lut.getName());
-            localPlaceHolders.put("autoLoot", String.valueOf(lut.isAutoLoot()));
-            localPlaceHolders.put("global", String.valueOf(lut.isGlobal()));
-            localPlaceHolders.put("delay", String.valueOf(lut.getDelay()));
+            localPlaceHolders.put("autoLoot", lut.isAutoLoot());
+            localPlaceHolders.put("global", lut.isGlobal());
+            localPlaceHolders.put("delay", lut.getDelay());
             msg.add(formatMsg(localPlaceHolders, getMessage(sender, LanguageConfigurationNode.LOOT_ELEMENT)));
         }
         msg.add(formatMsg(localPlaceHolders, getMessage(sender, LanguageConfigurationNode.LOOT_FOOTER)));
@@ -165,39 +165,39 @@ public class LootCommand extends VhatLootsBaseCommand {
         
         @Subcommand("global")
         @Syntax("<lootName> <global>")
-        @CommandCompletion("@loot @boolean")
-        public void onSetGlobal(CommandSender sender, Loot loot, boolean value) {
-            HashMap<String, String> localPlaceHolders = new HashMap<>();
-            localPlaceHolders.put("lootName", loot.getName());
-            localPlaceHolders.put("global", String.valueOf(value));
+        @CommandCompletion("@loot-configurations @boolean")
+        public void onSetGlobal(CommandSender sender, LootConfiguration lootConfiguration, boolean value) {
+            HashMap<String, Object> localPlaceHolders = new HashMap<>();
+            localPlaceHolders.put("lootName", lootConfiguration.getName());
+            localPlaceHolders.put("global", value);
             
-            loot.setGlobal(value);
+            lootConfiguration.setGlobal(value);
             lootHandler.update();
             sender.sendMessage(formatMsg(localPlaceHolders, getMessage(sender, LanguageConfigurationNode.LOOT_SET_GLOBAL)));
         }
         
         @Subcommand("autoloot")
         @Syntax("<lootName> <autoLoot>")
-        @CommandCompletion("@loot @boolean")
-        public void onSetAutoLoot(CommandSender sender, Loot loot, boolean value) {
-            HashMap<String, String> localPlaceHolders = new HashMap<>();
-            localPlaceHolders.put("lootName", loot.getName());
-            localPlaceHolders.put("autoLoot", String.valueOf(value));
+        @CommandCompletion("@loot-configurations @boolean")
+        public void onSetAutoLoot(CommandSender sender, LootConfiguration lootConfiguration, boolean value) {
+            HashMap<String, Object> localPlaceHolders = new HashMap<>();
+            localPlaceHolders.put("lootName", lootConfiguration.getName());
+            localPlaceHolders.put("autoLoot", value);
             
-            loot.setAutoLoot(value);
+            lootConfiguration.setAutoLoot(value);
             lootHandler.update();
             sender.sendMessage(formatMsg(localPlaceHolders, getMessage(sender, LanguageConfigurationNode.LOOT_SET_AUTOLOOT)));
         }
         
         @Subcommand("delay")
         @Syntax("<lootName> <delay>")
-        @CommandCompletion("@loot *")
-        public void onSetDelay(CommandSender sender, Loot loot, int delay) {
-            HashMap<String, String> localPlaceHolders = new HashMap<>();
-            localPlaceHolders.put("lootName", loot.getName());
-            localPlaceHolders.put("delay", String.valueOf(delay));
+        @CommandCompletion("@loot-configurations *")
+        public void onSetDelay(CommandSender sender, LootConfiguration lootConfiguration, int delay) {
+            HashMap<String, Object> localPlaceHolders = new HashMap<>();
+            localPlaceHolders.put("lootName", lootConfiguration.getName());
+            localPlaceHolders.put("delay", delay);
             
-            loot.setDelay(delay);
+            lootConfiguration.setDelay(delay);
             lootHandler.update();
             sender.sendMessage(formatMsg(localPlaceHolders, getMessage(sender, LanguageConfigurationNode.LOOT_SET_DELAY)));
         }
@@ -206,47 +206,45 @@ public class LootCommand extends VhatLootsBaseCommand {
     @Subcommand("xp")
     @CommandPermission("vhatloots.create")
     public class Xp extends VhatLootsBaseCommand {
-        
         @Subcommand("add")
-        @Syntax("<lootName> <xpName> <low> <high> <probability>")
-        @CommandCompletion("@loot * * * *")
-        public void onXPAdd(CommandSender sender, Loot loot, String xpName, int low, int high, double probability) {
-            HashMap<String, String> localPlaceHolders = new HashMap<>();
+        @Syntax("<collectionName> <xpName> <low> <high> <probability>")
+        @CommandCompletion("@loot-collections * * * *")
+        public void onXPAdd(CommandSender sender, LootCollection lootCollection, String xpName, int low, int high, double probability) {
             if (low > high) {
                 int j = low;
                 low = high;
                 high = j;
             }
-            localPlaceHolders.put("collectionName", loot.getName());
+            HashMap<String, Object> localPlaceHolders = new HashMap<>();
+            localPlaceHolders.put("collectionName", lootCollection.getName());
             localPlaceHolders.put("xpName", xpName);
-            localPlaceHolders.put("probability", String.valueOf(probability));
+            localPlaceHolders.put("probability", probability);
             localPlaceHolders.put("range", low + " - " + high);
             
-            LinkedHashMap<String, XPLoot> xp = loot.getXP();
+            LinkedHashMap<String, XPLoot> xp = lootCollection.getXp();
             if (xp.containsKey(xpName)) {
                 sender.sendMessage(formatMsg(localPlaceHolders, getMessage(sender, LanguageConfigurationNode.LOOT_XP_EXISTS)));
                 return;
             }
             xp.put(xpName, new XPLoot(xpName, probability, low, high));
-            loot.setXP(xp);
+            lootCollection.setXp(xp);
             lootHandler.update();
             sender.sendMessage(formatMsg(localPlaceHolders, getMessage(sender, LanguageConfigurationNode.LOOT_XP_ADDED)));
         }
         
-        
         @Subcommand("edit")
-        @Syntax("<lootName> <xpName> <low> <high> <probability>")
-        @CommandCompletion("@loot @lootxproot * * *")
-        public void onXPEdit(CommandSender sender, Loot loot, XPLoot xp, int low, int high, double probability) {
-            HashMap<String, String> localPlaceHolders = new HashMap<>();
+        @Syntax("<collectionName> <xpName> <low> <high> <probability>")
+        @CommandCompletion("@loot-collections @loot-xp * * *")
+        public void onXPEdit(CommandSender sender, LootCollection lootCollection, XPLoot xp, int low, int high, @Optional double probability) {
             if (low > high) {
                 int j = low;
                 low = high;
                 high = j;
             }
-            localPlaceHolders.put("collectionName", loot.getName());
+            HashMap<String, Object> localPlaceHolders = new HashMap<>();
+            localPlaceHolders.put("collectionName", lootCollection.getName());
             localPlaceHolders.put("xpName", xp.getName());
-            localPlaceHolders.put("probability", String.valueOf(probability));
+            localPlaceHolders.put("probability", probability);
             localPlaceHolders.put("range", low + " - " + high);
             
             xp.setProbability(probability);
@@ -258,34 +256,33 @@ public class LootCommand extends VhatLootsBaseCommand {
         
         @Subcommand("remove")
         @Syntax("<lootName> <xpName> ")
-        @CommandCompletion("@loot @lootxproot")
-        public void onXPRemove(CommandSender sender, Loot loot, XPLoot xp) {
-            HashMap<String, String> localPlaceHolders = new HashMap<>();
-            localPlaceHolders.put("lootName", loot.getName());
+        @CommandCompletion("@loot-collections @loot-xp")
+        public void onXPRemove(CommandSender sender, LootCollection lootCollection, XPLoot xp) {
+            HashMap<String, Object> localPlaceHolders = new HashMap<>();
             localPlaceHolders.put("xpName", xp.getName());
-            localPlaceHolders.put("collectionName", loot.getName());
+            localPlaceHolders.put("collectionName", lootCollection.getName());
             
-            loot.getXP().remove(xp.getName());
+            lootCollection.getXp().remove(xp.getName());
             lootHandler.update();
             sender.sendMessage(formatMsg(localPlaceHolders, getMessage(sender, LanguageConfigurationNode.LOOT_XP_REMOVED)));
         }
         
         @Subcommand("list")
         @Syntax("<lootName> <page>")
-        @CommandCompletion("@loot *")
-        public void onXPList(CommandSender sender, Loot loot, @Default("1") int page) {
-            HashMap<String, String> localPlaceHolders = new HashMap<>();
+        @CommandCompletion("@loot-collections *")
+        public void onXPList(CommandSender sender, LootCollection lootCollection, @Default("1") int page) {
             if (page == 0) {
                 page = 1;
             }
-            LinkedHashMap<String, XPLoot> xpmap = loot.getXP();
+            LinkedHashMap<String, XPLoot> xpmap = lootCollection.getXp();
             int maxPage = (int) Math.ceil(xpmap.size() / 8.0);
             if (maxPage == 0) {
                 maxPage = 1;
             }
-            localPlaceHolders.put("page", String.valueOf(page));
-            localPlaceHolders.put("collectionName", loot.getName());
-            localPlaceHolders.put("maxPage", String.valueOf(maxPage));
+            HashMap<String, Object> localPlaceHolders = new HashMap<>();
+            localPlaceHolders.put("page", page);
+            localPlaceHolders.put("collectionName", lootCollection.getName());
+            localPlaceHolders.put("maxPage", maxPage);
             
             List<XPLoot> vals = new ArrayList<>(xpmap.values());
             
@@ -297,8 +294,8 @@ public class LootCommand extends VhatLootsBaseCommand {
                 }
                 XPLoot val = vals.get(i);
                 localPlaceHolders.put("xpName", val.getName());
-                localPlaceHolders.put("probability", String.valueOf(val.getProbability()));
-                localPlaceHolders.put("range", val.getLowerXP() + "-" + val.getUpperXP());
+                localPlaceHolders.put("probability", val.getProbability());
+                localPlaceHolders.put("range", val.getLowerXP() + " - " + val.getUpperXP());
                 msg.add(formatMsg(localPlaceHolders, getMessage(sender, LanguageConfigurationNode.LOOT_XP_ELEMENT)));
             }
             msg.add(formatMsg(localPlaceHolders, getMessage(sender, LanguageConfigurationNode.LOOT_XP_FOOTER)));
@@ -312,45 +309,44 @@ public class LootCommand extends VhatLootsBaseCommand {
         
         @Subcommand("add")
         @Syntax("<lootName> <moneyName> <low> <high> <probability>")
-        @CommandCompletion("@loot * * * *")
-        public void onMoneyAdd(CommandSender sender, Loot loot, String moneyName, double low, double high, double probability) {
-            HashMap<String, String> localPlaceHolders = new HashMap<>();
+        @CommandCompletion("@loot-collections * * * *")
+        public void onMoneyAdd(CommandSender sender, LootCollection lootCollection, String moneyName, int low, int high, double probability) {
             if (low > high) {
-                double j = low;
+                int j = low;
                 low = high;
                 high = j;
             }
-            localPlaceHolders.put("lootName", loot.getName());
+            HashMap<String, Object> localPlaceHolders = new HashMap<>();
+            localPlaceHolders.put("lootName", lootCollection.getName());
             localPlaceHolders.put("moneyName", moneyName);
-            localPlaceHolders.put("collectionName", loot.getName());
-            localPlaceHolders.put("probability", String.valueOf(probability));
+            localPlaceHolders.put("collectionName", lootCollection.getName());
+            localPlaceHolders.put("probability", probability);
             localPlaceHolders.put("range", low + " - " + high);
             
-            LinkedHashMap<String, MoneyLoot> money = loot.getMoney();
+            LinkedHashMap<String, MoneyLoot> money = lootCollection.getMoney();
             if (money.containsKey(moneyName)) {
                 sender.sendMessage(formatMsg(localPlaceHolders, getMessage(sender, LanguageConfigurationNode.LOOT_MONEY_EXISTS)));
                 return;
             }
             money.put(moneyName, new MoneyLoot(moneyName, probability, low, high));
-            loot.setMoney(money);
+            lootCollection.setMoney(money);
             lootHandler.update();
             sender.sendMessage(formatMsg(localPlaceHolders, getMessage(sender, LanguageConfigurationNode.LOOT_MONEY_ADDED)));
         }
         
         @Subcommand("edit")
         @Syntax("<lootName> <moneyName> <low> <high> <probability>")
-        @CommandCompletion("@loot @lootmoneyroot * * *")
-        public void onMoneyEdit(CommandSender sender, Loot loot, MoneyLoot money, double low, double high, @Optional double probability) {
-            HashMap<String, String> localPlaceHolders = new HashMap<>();
+        @CommandCompletion("@loot-collections @loot-money * * *")
+        public void onMoneyEdit(CommandSender sender, LootCollection lootCollection, MoneyLoot money, int low, int high, @Optional double probability) {
+            HashMap<String, Object> localPlaceHolders = new HashMap<>();
             if (low > high) {
-                double j = low;
+                int j = low;
                 low = high;
                 high = j;
             }
-            localPlaceHolders.put("lootName", loot.getName());
-            localPlaceHolders.put("collectionName", loot.getName());
+            localPlaceHolders.put("collectionName", lootCollection.getName());
             localPlaceHolders.put("moneyName", money.getName());
-            localPlaceHolders.put("probability", String.valueOf(probability));
+            localPlaceHolders.put("probability", probability);
             localPlaceHolders.put("range", low + " - " + high);
             money.setProbability(probability);
             money.setLowerMoney(low);
@@ -361,34 +357,33 @@ public class LootCommand extends VhatLootsBaseCommand {
         
         @Subcommand("remove")
         @Syntax("<lootName> <moneyName>")
-        @CommandCompletion("@loot @lootmoneyroot")
-        public void onMoneyRemove(CommandSender sender, Loot loot, MoneyLoot money) {
-            HashMap<String, String> localPlaceHolders = new HashMap<>();
-            localPlaceHolders.put("lootName", loot.getName());
-            localPlaceHolders.put("collectionName", loot.getName());
+        @CommandCompletion("@loot-collections @loot-money")
+        public void onMoneyRemove(CommandSender sender, LootCollection lootCollection, MoneyLoot money) {
+            HashMap<String, Object> localPlaceHolders = new HashMap<>();
+            localPlaceHolders.put("collectionName", lootCollection.getName());
             localPlaceHolders.put("moneyName", money.getName());
-            loot.getMoney().remove(money.getName());
+            lootCollection.getMoney().remove(money.getName());
             lootHandler.update();
             sender.sendMessage(formatMsg(localPlaceHolders, getMessage(sender, LanguageConfigurationNode.LOOT_MONEY_REMOVED)));
         }
         
         @Subcommand("list")
         @Syntax("<lootName> <page>")
-        @CommandCompletion("@loot *")
-        public void onMoneyList(CommandSender sender, Loot loot, @Default("1") int page) {
+        @CommandCompletion("@loot-collections *")
+        public void onMoneyList(CommandSender sender, LootCollection lootCollection, @Default("1") int page) {
             if (page == 0) {
                 page = 1;
             }
-            LinkedHashMap<String, MoneyLoot> moneymap = loot.getMoney();
+            LinkedHashMap<String, MoneyLoot> moneymap = lootCollection.getMoney();
             int maxPage = (int) Math.ceil(moneymap.size() / 8.0);
             if (maxPage == 0) {
                 maxPage = 1;
             }
-            HashMap<String, String> localPlaceHolders = new HashMap<>();
-            localPlaceHolders.put("page", String.valueOf(page));
-            localPlaceHolders.put("lootName", loot.getName());
-            localPlaceHolders.put("collectionName", loot.getName());
-            localPlaceHolders.put("maxPage", String.valueOf(maxPage));
+            HashMap<String, Object> localPlaceHolders = new HashMap<>();
+            localPlaceHolders.put("page", page);
+            localPlaceHolders.put("lootName", lootCollection.getName());
+            localPlaceHolders.put("collectionName", lootCollection.getName());
+            localPlaceHolders.put("maxPage", maxPage);
             
             List<MoneyLoot> vals = new ArrayList<>(moneymap.values());
             
@@ -400,8 +395,8 @@ public class LootCommand extends VhatLootsBaseCommand {
                 }
                 MoneyLoot val = vals.get(i);
                 localPlaceHolders.put("moneyName", val.getName());
-                localPlaceHolders.put("probability", String.valueOf(val.getProbability()));
-                localPlaceHolders.put("range", val.getLowerMoney() + "-" + val.getUpperMoney());
+                localPlaceHolders.put("probability", val.getProbability());
+                localPlaceHolders.put("range", val.getLowerMoney() + " - " + val.getUpperMoney());
                 msg.add(formatMsg(localPlaceHolders, getMessage(sender, LanguageConfigurationNode.LOOT_MONEY_ELEMENT)));
             }
             msg.add(formatMsg(localPlaceHolders, getMessage(sender, LanguageConfigurationNode.LOOT_MONEY_FOOTER)));
@@ -415,56 +410,54 @@ public class LootCommand extends VhatLootsBaseCommand {
         
         @Subcommand("add")
         @Syntax("<lootName> <itemName> <probability>")
-        @CommandCompletion("@loot * * ")
-        public void onItemAdd(Player player, Loot loot, String itemName, double probability) {
-            HashMap<String, String> localPlaceHolders = new HashMap<>();
-            localPlaceHolders.put("lootName", loot.getName());
-            localPlaceHolders.put("collectionName", loot.getName());
+        @CommandCompletion("@loot-collections * * ")
+        public void onItemAdd(Player player, LootCollection lootCollection, String itemName, double probability) {
+            HashMap<String, Object> localPlaceHolders = new HashMap<>();
+            localPlaceHolders.put("collectionName", lootCollection.getName());
             localPlaceHolders.put("itemName", itemName);
-            localPlaceHolders.put("probability", String.valueOf(probability));
+            localPlaceHolders.put("probability", probability);
             
-            LinkedHashMap<String, ItemLoot> item = loot.getItems();
+            LinkedHashMap<String, ItemLoot> item = lootCollection.getItems();
             if (item.containsKey(itemName)) {
                 player.sendMessage(formatMsg(localPlaceHolders, getMessage(player, LanguageConfigurationNode.LOOT_ITEM_EXISTS)));
                 return;
             }
             item.put(itemName, new ItemLoot(itemName, probability, player.getInventory().getItemInMainHand()));
-            loot.setItems(item);
+            lootCollection.setItems(item);
             lootHandler.update();
             player.sendMessage(formatMsg(localPlaceHolders, getMessage(player, LanguageConfigurationNode.LOOT_ITEM_ADDED)));
         }
         
         @Subcommand("remove")
         @Syntax("<lootName> <itemName>")
-        @CommandCompletion("@loot @lootitemsroot")
-        public void onItemRemove(CommandSender sender, Loot loot, ItemLoot item) {
-            HashMap<String, String> localPlaceHolders = new HashMap<>();
-            localPlaceHolders.put("lootName", loot.getName());
-            localPlaceHolders.put("collectionName", loot.getName());
+        @CommandCompletion("@loot-collections @loot-items")
+        public void onItemRemove(CommandSender sender, LootCollection lootCollection, ItemLoot item) {
+            HashMap<String, Object> localPlaceHolders = new HashMap<>();
+            localPlaceHolders.put("collectionName", lootCollection.getName());
             localPlaceHolders.put("itemName", item.getName());
             
-            loot.getItems().remove(item.getName());
+            lootCollection.getItems().remove(item.getName());
             lootHandler.update();
             sender.sendMessage(formatMsg(localPlaceHolders, getMessage(sender, LanguageConfigurationNode.LOOT_ITEM_REMOVED)));
         }
         
         @Subcommand("list")
         @Syntax("<lootName> <page>")
-        @CommandCompletion("@loot *")
-        public void onItemList(CommandSender sender, Loot loot, @Default("1") int page) {
-            HashMap<String, String> localPlaceHolders = new HashMap<>();
+        @CommandCompletion("@loot-collections *")
+        public void onItemList(CommandSender sender, LootCollection lootCollection, @Default("1") int page) {
             if (page == 0) {
                 page = 1;
             }
-            LinkedHashMap<String, ItemLoot> xpmap = loot.getItems();
+            LinkedHashMap<String, ItemLoot> xpmap = lootCollection.getItems();
             int maxPage = (int) Math.ceil(xpmap.size() / 8.0);
             if (maxPage == 0) {
                 maxPage = 1;
             }
-            localPlaceHolders.put("page", String.valueOf(page));
-            localPlaceHolders.put("lootName", loot.getName());
-            localPlaceHolders.put("collectionName", loot.getName());
-            localPlaceHolders.put("maxPage", String.valueOf(maxPage));
+            HashMap<String, Object> localPlaceHolders = new HashMap<>();
+            localPlaceHolders.put("page", page);
+            localPlaceHolders.put("lootName", lootCollection.getName());
+            localPlaceHolders.put("collectionName", lootCollection.getName());
+            localPlaceHolders.put("maxPage", maxPage);
             
             List<ItemLoot> vals = new ArrayList<>(xpmap.values());
             
@@ -475,7 +468,7 @@ public class LootCommand extends VhatLootsBaseCommand {
                 }
                 ItemLoot val = vals.get(i);
                 localPlaceHolders.put("itemName", val.getName());
-                localPlaceHolders.put("probability", String.valueOf(val.getProbability()));
+                localPlaceHolders.put("probability", val.getProbability());
                 // So to allow the custom stuff so {item} is replaced by a hoverable item
                 // We need to section up the message into before, item, after to do that we split
                 // Also note that it can have multiple {item} why do I do this to myself?
@@ -500,10 +493,10 @@ public class LootCommand extends VhatLootsBaseCommand {
     public class Collection extends VhatLootsBaseCommand {
         @Subcommand("add")
         @Syntax("<lootName> <collectionPath> <probability>")
-        @CommandCompletion("@loot * *")
-        public void onCollectionAdd(CommandSender sender, Loot loot, String collectionName, double probability) {
-            HashMap<String, String> localPlaceHolders = new HashMap<>();
-            localPlaceHolders.put("lootName", loot.getName());
+        @CommandCompletion("@loot-configurations * *")
+        public void onCollectionAdd(CommandSender sender, LootConfiguration lootConfiguration, String collectionName, double probability) {
+            HashMap<String, Object> localPlaceHolders = new HashMap<>();
+            localPlaceHolders.put("lootName", lootConfiguration.getName());
             while (collectionName.startsWith(".")) {
                 collectionName = collectionName.substring(1);
             }
@@ -511,347 +504,56 @@ public class LootCommand extends VhatLootsBaseCommand {
                 collectionName = collectionName.substring(0, collectionName.length() - 1);
             }
             localPlaceHolders.put("collectionName", collectionName);
-            localPlaceHolders.put("probability", String.valueOf(probability));
+            localPlaceHolders.put("probability", probability);
             
-            HashMap<String, CollectionLoot> lootCollectionPaths = loot.getLootPaths();
+            HashMap<String, LootCollection> lootCollectionPaths = lootConfiguration.getLootPaths();
             if (lootCollectionPaths.containsKey(collectionName)) {
                 sender.sendMessage(formatMsg(localPlaceHolders, getMessage(sender, LanguageConfigurationNode.LOOT_COLLECTION_EXISTS)));
                 return;
             }
-            LinkedHashMap<String, CollectionLoot> collections = loot.getCollections();
+            LinkedHashMap<String, LootCollection> collections = lootConfiguration.getLoot().getCollections();
             String[] parts = collectionName.split("\\.");
-            CollectionLoot newCollection = new CollectionLoot(collectionName, probability);
+            LootCollection newCollection = new LootCollection(collectionName, probability);
             if (parts.length == 1) {
                 collections.put(collectionName, newCollection);
-                lootCollectionPaths.put(collectionName, newCollection);
+                lootCollectionPaths.put(lootConfiguration.getName() + "." + collectionName, newCollection);
                 
-                loot.setCollections(collections);
-                loot.setLootPaths(lootCollectionPaths);
+                lootConfiguration.getLoot().setCollections(collections);
+                lootConfiguration.setLootPaths(lootCollectionPaths);
             } else {
                 StringBuilder parentPath = new StringBuilder(parts[0]);
                 for (int i = 1; i <= parts.length - 2; i++) {
                     parentPath.append(".").append(parts[i]);
                 }
-                CollectionLoot parentCollection = lootCollectionPaths.get(parentPath.toString());
+                LootCollection parentCollection = lootCollectionPaths.get(lootConfiguration.getName() + "." + parentPath.toString());
                 if (parentCollection == null) {
                     localPlaceHolders.put("parentCollectionName", parentPath.toString());
                     sender.sendMessage(formatMsg(localPlaceHolders, getMessage(sender, LanguageConfigurationNode.LOOT_COLLECTION_PARENT_DOESNT_EXIST)));
                     return;
                 } else {
-                    LinkedHashMap<String, CollectionLoot> parentCollections = parentCollection.getCollections();
+                    LinkedHashMap<String, LootCollection> parentCollections = parentCollection.getCollections();
                     
                     parentCollections.put(parts[parts.length - 1], newCollection);
-                    lootCollectionPaths.put(collectionName, newCollection);
+                    lootCollectionPaths.put(lootConfiguration.getName() + "." + collectionName, newCollection);
                     
                     parentCollection.setCollections(parentCollections);
-                    loot.setLootPaths(lootCollectionPaths);
+                    lootConfiguration.setLootPaths(lootCollectionPaths);
                 }
             }
             lootHandler.update();
             sender.sendMessage(formatMsg(localPlaceHolders, LootCommand.getMessage(sender, LanguageConfigurationNode.LOOT_COLLECTION_ADDED)));
             
         }
-    
+        
         @Subcommand("set")
         @Syntax("<lootName> <collectionPath> <attribute> <value>")
-        @CommandCompletion("@loot @lootcollections * *")
-        public void onCollectionSet(CommandSender sender, Loot loot, CollectionLoot collection, String attribute, String value) {
-        
+        @CommandCompletion("@loot-configurations @loot-collections * *")
+        public void onCollectionSet(CommandSender sender, LootConfiguration lootConfiguration, LootCollection collection, String attribute, String value) {
+            
         }
         
-        public void onCollectionRemove(CommandSender sender, Loot loot, CollectionLoot collection) {
-        
-        }
-        
-        @Subcommand("xp")
-        public class Xp extends VhatLootsBaseCommand {
-            @Subcommand("add")
-            @Syntax("<lootName> <collectionPath> <xpName> <low> <high> <probability>")
-            @CommandCompletion("@loot @lootcollections * * * *")
-            public void onXPAdd(CommandSender sender, Loot loot, CollectionLoot collection, String xpName, int low, int high, double probability) {
-                HashMap<String, String> localPlaceHolders = new HashMap<>();
-                if (low > high) {
-                    int j = low;
-                    low = high;
-                    high = j;
-                }
-                localPlaceHolders.put("lootName", loot.getName());
-                localPlaceHolders.put("collectionName", collection.getName());
-                localPlaceHolders.put("xpName", xpName);
-                localPlaceHolders.put("probability", String.valueOf(probability));
-                localPlaceHolders.put("range", low + " - " + high);
-                
-                LinkedHashMap<String, XPLoot> xp = collection.getXp();
-                if (xp.containsKey(xpName)) {
-                    sender.sendMessage(formatMsg(localPlaceHolders, getMessage(sender, LanguageConfigurationNode.LOOT_XP_EXISTS)));
-                    return;
-                }
-                xp.put(xpName, new XPLoot(xpName, probability, low, high));
-                collection.setXp(xp);
-                lootHandler.update();
-                sender.sendMessage(formatMsg(localPlaceHolders, getMessage(sender, LanguageConfigurationNode.LOOT_XP_ADDED)));
-            }
+        public void onCollectionRemove(CommandSender sender, LootConfiguration lootConfiguration, LootCollection collection) {
             
-            
-            @Subcommand("edit")
-            @Syntax("<lootName> <collectionPath> <xpName> <low> <high> <probability>")
-            @CommandCompletion("@loot @lootcollections @lootxp * * *")
-            public void onXPEdit(CommandSender sender, Loot loot, CollectionLoot collection, XPLoot xp, int low, int high, double probability) {
-                HashMap<String, String> localPlaceHolders = new HashMap<>();
-                if (low > high) {
-                    int j = low;
-                    low = high;
-                    high = j;
-                }
-                localPlaceHolders.put("lootName", loot.getName());
-                localPlaceHolders.put("collectionName", collection.getName());
-                localPlaceHolders.put("xpName", xp.getName());
-                localPlaceHolders.put("probability", String.valueOf(probability));
-                localPlaceHolders.put("range", low + " - " + high);
-                
-                xp.setProbability(probability);
-                xp.setLowerXP(low);
-                xp.setUpperXP(high);
-                lootHandler.update();
-                sender.sendMessage(formatMsg(localPlaceHolders, getMessage(sender, LanguageConfigurationNode.LOOT_XP_EDITED)));
-            }
-            
-            @Subcommand("remove")
-            @Syntax("<lootName> <collectionPath> <xpName> ")
-            @CommandCompletion("@loot @lootcollections @lootxp")
-            public void onXPRemove(CommandSender sender, Loot loot, CollectionLoot collection, XPLoot xp) {
-                HashMap<String, String> localPlaceHolders = new HashMap<>();
-                localPlaceHolders.put("lootName", loot.getName());
-                localPlaceHolders.put("collectionName", collection.getName());
-                localPlaceHolders.put("xpName", xp.getName());
-                
-                collection.getXp().remove(xp.getName());
-                lootHandler.update();
-                sender.sendMessage(formatMsg(localPlaceHolders, getMessage(sender, LanguageConfigurationNode.LOOT_XP_REMOVED)));
-            }
-            
-            @Subcommand("list")
-            @Syntax("<lootName> <collectionPath> <page>")
-            @CommandCompletion("@loot @lootcollections *")
-            public void onXPList(CommandSender sender, Loot loot, CollectionLoot collection, @Default("1") int page) {
-                HashMap<String, String> localPlaceHolders = new HashMap<>();
-                if (page == 0) {
-                    page = 1;
-                }
-                LinkedHashMap<String, XPLoot> xpmap = collection.getXp();
-                int maxPage = (int) Math.ceil(xpmap.size() / 8.0);
-                if (maxPage == 0) {
-                    maxPage = 1;
-                }
-                localPlaceHolders.put("page", String.valueOf(page));
-                localPlaceHolders.put("lootName", loot.getName());
-                localPlaceHolders.put("collectionName", collection.getName());
-                localPlaceHolders.put("maxPage", String.valueOf(maxPage));
-                
-                List<XPLoot> vals = new ArrayList<>(xpmap.values());
-                
-                List<String> msg = new ArrayList<>();
-                msg.add(formatMsg(localPlaceHolders, getMessage(sender, LanguageConfigurationNode.LOOT_XP_HEADER)));
-                for (int i = (page - 1) * 8; i < vals.size(); i++) {
-                    if (i > page * 8 - 1) {
-                        break;
-                    }
-                    XPLoot val = vals.get(i);
-                    localPlaceHolders.put("xpName", val.getName());
-                    localPlaceHolders.put("probability", String.valueOf(val.getProbability()));
-                    localPlaceHolders.put("range", val.getLowerXP() + "-" + val.getUpperXP());
-                    msg.add(formatMsg(localPlaceHolders, getMessage(sender, LanguageConfigurationNode.LOOT_XP_ELEMENT)));
-                }
-                msg.add(formatMsg(localPlaceHolders, getMessage(sender, LanguageConfigurationNode.LOOT_XP_FOOTER)));
-                sender.sendMessage(msg.toArray(new String[0]));
-            }
-        }
-        
-        @Subcommand("money")
-        public class Money extends VhatLootsBaseCommand {
-            
-            @Subcommand("add")
-            @Syntax("<lootName> <collectionPath> <moneyName> <low> <high> <probability>")
-            @CommandCompletion("@loot @lootcollections * * * *")
-            public void onMoneyAdd(CommandSender sender, Loot loot, CollectionLoot collection, String moneyName, double low, double high, double probability) {
-                HashMap<String, String> localPlaceHolders = new HashMap<>();
-                if (low > high) {
-                    double j = low;
-                    low = high;
-                    high = j;
-                }
-                localPlaceHolders.put("lootName", loot.getName());
-                localPlaceHolders.put("collectionName", collection.getName());
-                localPlaceHolders.put("moneyName", moneyName);
-                localPlaceHolders.put("probability", String.valueOf(probability));
-                localPlaceHolders.put("range", low + " - " + high);
-                
-                LinkedHashMap<String, MoneyLoot> money = collection.getMoney();
-                if (money.containsKey(moneyName)) {
-                    sender.sendMessage(formatMsg(localPlaceHolders, getMessage(sender, LanguageConfigurationNode.LOOT_MONEY_EXISTS)));
-                    return;
-                }
-                money.put(moneyName, new MoneyLoot(moneyName, probability, low, high));
-                collection.setMoney(money);
-                lootHandler.update();
-                sender.sendMessage(formatMsg(localPlaceHolders, getMessage(sender, LanguageConfigurationNode.LOOT_MONEY_ADDED)));
-            }
-            
-            @Subcommand("edit")
-            @Syntax("<lootName> <collectionPath> <moneyName> <low> <high> <probability>")
-            @CommandCompletion("@loot @lootcollections @lootmoney * * *")
-            public void onMoneyEdit(CommandSender sender, Loot loot, CollectionLoot collection, MoneyLoot money, double low, double high, @Optional double probability) {
-                HashMap<String, String> localPlaceHolders = new HashMap<>();
-                if (low > high) {
-                    double j = low;
-                    low = high;
-                    high = j;
-                }
-                localPlaceHolders.put("lootName", loot.getName());
-                localPlaceHolders.put("collectionName", collection.getName());
-                localPlaceHolders.put("moneyName", money.getName());
-                localPlaceHolders.put("probability", String.valueOf(probability));
-                localPlaceHolders.put("range", low + " - " + high);
-                money.setProbability(probability);
-                money.setLowerMoney(low);
-                money.setUpperMoney(high);
-                lootHandler.update();
-                sender.sendMessage(formatMsg(localPlaceHolders, getMessage(sender, LanguageConfigurationNode.LOOT_MONEY_EDITED)));
-            }
-            
-            @Subcommand("remove")
-            @Syntax("<lootName> <collectionName> <moneyName>")
-            @CommandCompletion("@loot @lootcollections @lootmoney")
-            public void onMoneyRemove(CommandSender sender, Loot loot, CollectionLoot collection, MoneyLoot money) {
-                HashMap<String, String> localPlaceHolders = new HashMap<>();
-                localPlaceHolders.put("lootName", loot.getName());
-                localPlaceHolders.put("collectionName", collection.getName());
-                localPlaceHolders.put("moneyName", money.getName());
-                collection.getMoney().remove(money.getName());
-                lootHandler.update();
-                sender.sendMessage(formatMsg(localPlaceHolders, getMessage(sender, LanguageConfigurationNode.LOOT_MONEY_REMOVED)));
-            }
-            
-            @Subcommand("list")
-            @Syntax("<lootName> <collectionPath> <page>")
-            @CommandCompletion("@loot @lootcollections *")
-            public void onMoneyList(CommandSender sender, Loot loot, CollectionLoot collection, @Default("1") int page) {
-                if (page == 0) {
-                    page = 1;
-                }
-                LinkedHashMap<String, MoneyLoot> moneymap = collection.getMoney();
-                int maxPage = (int) Math.ceil(moneymap.size() / 8.0);
-                if (maxPage == 0) {
-                    maxPage = 1;
-                }
-                HashMap<String, String> localPlaceHolders = new HashMap<>();
-                localPlaceHolders.put("page", String.valueOf(page));
-                localPlaceHolders.put("lootName", loot.getName());
-                localPlaceHolders.put("collectionName", collection.getName());
-                localPlaceHolders.put("maxPage", String.valueOf(maxPage));
-                
-                List<MoneyLoot> vals = new ArrayList<>(moneymap.values());
-                
-                List<String> msg = new ArrayList<>();
-                msg.add(formatMsg(localPlaceHolders, getMessage(sender, LanguageConfigurationNode.LOOT_MONEY_HEADER)));
-                for (int i = (page - 1) * 8; i < vals.size(); i++) {
-                    if (i > page * 8 - 1) {
-                        break;
-                    }
-                    MoneyLoot val = vals.get(i);
-                    localPlaceHolders.put("moneyName", val.getName());
-                    localPlaceHolders.put("probability", String.valueOf(val.getProbability()));
-                    localPlaceHolders.put("range", val.getLowerMoney() + "-" + val.getUpperMoney());
-                    msg.add(formatMsg(localPlaceHolders, getMessage(sender, LanguageConfigurationNode.LOOT_MONEY_ELEMENT)));
-                }
-                msg.add(formatMsg(localPlaceHolders, getMessage(sender, LanguageConfigurationNode.LOOT_MONEY_FOOTER)));
-                sender.sendMessage(msg.toArray(new String[0]));
-            }
-        }
-        
-        @Subcommand("item")
-        public class Item extends VhatLootsBaseCommand {
-            
-            @Subcommand("add")
-            @Syntax("<lootName> <collectionPath> <itemName> <probability>")
-            @CommandCompletion("@loot @lootcollections * *")
-            public void onItemAdd(Player player, Loot loot, CollectionLoot collection, String itemName, double probability) {
-                HashMap<String, String> localPlaceHolders = new HashMap<>();
-                localPlaceHolders.put("lootName", loot.getName());
-                localPlaceHolders.put("collectionName", collection.getName());
-                localPlaceHolders.put("itemName", itemName);
-                localPlaceHolders.put("probability", String.valueOf(probability));
-                
-                LinkedHashMap<String, ItemLoot> item = collection.getItems();
-                if (item.containsKey(itemName)) {
-                    player.sendMessage(formatMsg(localPlaceHolders, getMessage(player, LanguageConfigurationNode.LOOT_ITEM_EXISTS)));
-                    return;
-                }
-                item.put(itemName, new ItemLoot(itemName, probability, player.getInventory().getItemInMainHand()));
-                collection.setItems(item);
-                lootHandler.update();
-                player.sendMessage(formatMsg(localPlaceHolders, getMessage(player, LanguageConfigurationNode.LOOT_ITEM_ADDED)));
-            }
-            
-            @Subcommand("remove")
-            @Syntax("<lootName> <collectionPath> <itemName>")
-            @CommandCompletion("@loot @lootcollections @lootitems")
-            public void onItemRemove(CommandSender sender, Loot loot, CollectionLoot collection, ItemLoot item) {
-                HashMap<String, String> localPlaceHolders = new HashMap<>();
-                localPlaceHolders.put("lootName", loot.getName());
-                localPlaceHolders.put("collectionName", collection.getName());
-                localPlaceHolders.put("itemName", item.getName());
-                
-                collection.getItems().remove(item.getName());
-                lootHandler.update();
-                sender.sendMessage(formatMsg(localPlaceHolders, getMessage(sender, LanguageConfigurationNode.LOOT_ITEM_REMOVED)));
-            }
-            
-            @Subcommand("list")
-            @Syntax("<lootName> <collectionPath> <page>")
-            @CommandCompletion("@loot @lootcollections*")
-            public void onItemList(CommandSender sender, Loot loot, CollectionLoot collection, @Default("1") int page) {
-                HashMap<String, String> localPlaceHolders = new HashMap<>();
-                if (page == 0) {
-                    page = 1;
-                }
-                LinkedHashMap<String, ItemLoot> xpmap = collection.getItems();
-                int maxPage = (int) Math.ceil(xpmap.size() / 8.0);
-                if (maxPage == 0) {
-                    maxPage = 1;
-                }
-                localPlaceHolders.put("page", String.valueOf(page));
-                localPlaceHolders.put("lootName", loot.getName());
-                localPlaceHolders.put("collectionName", collection.getName());
-                localPlaceHolders.put("maxPage", String.valueOf(maxPage));
-                
-                List<ItemLoot> vals = new ArrayList<>(xpmap.values());
-                
-                sender.sendMessage(formatMsg(localPlaceHolders, getMessage(sender, LanguageConfigurationNode.LOOT_ITEM_HEADER)));
-                for (int i = (page - 1) * 8; i < vals.size(); i++) {
-                    if (i > page * 8 - 1) {
-                        break;
-                    }
-                    ItemLoot val = vals.get(i);
-                    localPlaceHolders.put("itemName", val.getName());
-                    localPlaceHolders.put("probability", String.valueOf(val.getProbability()));
-                    // So to allow the custom stuff so {item} is replaced by a hoverable item
-                    // We need to section up the message into before, item, after to do that we split
-                    // Also note that it can have multiple {item} why do I do this to myself?
-                    String msg = formatMsg(localPlaceHolders, getMessage(sender, LanguageConfigurationNode.LOOT_ITEM_ELEMENT));
-                    List<BaseComponent> components = new ArrayList<>();
-                    while (msg.contains("{item}")) {
-                        String before = msg.substring(0, msg.indexOf("{item}"));
-                        components.addAll(Arrays.asList(TextComponent.fromLegacyText(before)));
-                        components.add(MessageHelper.getClickableItem(formatMsg(localPlaceHolders,
-                                getMessage(sender, LanguageConfigurationNode.LOOT_ITEM_ELEMENT_NAME)), val.getItemStack()));
-                        msg = msg.substring(msg.indexOf("{item}")).substring(6);
-                    }
-                    components.addAll(Arrays.asList(TextComponent.fromLegacyText(msg)));
-                    sender.spigot().sendMessage(components.toArray(new BaseComponent[0]));
-                }
-                sender.sendMessage(formatMsg(localPlaceHolders, getMessage(sender, LanguageConfigurationNode.LOOT_ITEM_FOOTER)));
-            }
         }
     }
 }

@@ -16,7 +16,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package de.articdive.vhatloots.configuration.gson.objects;
+package de.articdive.vhatloots.configuration.loot.objects;
 
 import de.articdive.vhatloots.events.objects.LootBundle;
 import de.articdive.vhatloots.helpers.RandomHelper;
@@ -28,7 +28,7 @@ import java.util.List;
 /**
  * @author Lukas Mansour
  */
-public class CollectionLoot extends LootObject {
+public class LootCollection extends LootObject {
     private transient String path;
     private int minRollAmountXP;
     private int maxRollAmountXP;
@@ -44,9 +44,9 @@ public class CollectionLoot extends LootObject {
     private LinkedHashMap<String, MoneyLoot> money;
     private LinkedHashMap<String, ItemLoot> items;
     private LinkedHashMap<String, CommandLoot> commands;
-    private LinkedHashMap<String, CollectionLoot> collections;
+    private LinkedHashMap<String, LootCollection> collections;
     
-    public CollectionLoot(String name, double probability) {
+    public LootCollection(String name, double probability) {
         super(name, probability);
         minRollAmountXP = 0;
         minRollAmountMoney = 0;
@@ -93,7 +93,7 @@ public class CollectionLoot extends LootObject {
             collectiveItems = true;
         }
         if (maxRollAmountCollections <= 0) {
-            for (CollectionLoot collection : this.collections.values()) {
+            for (LootCollection collection : this.collections.values()) {
                 collection.generateLoot(lootBundle, lootingBonus);
             }
         } else {
@@ -262,14 +262,14 @@ public class CollectionLoot extends LootObject {
         this.items = items;
     }
     
-    public LinkedHashMap<String, CollectionLoot> getCollections() {
+    public LinkedHashMap<String, LootCollection> getCollections() {
         if (collections == null) {
             return new LinkedHashMap<>();
         }
         return collections;
     }
     
-    public void setCollections(LinkedHashMap<String, CollectionLoot> collections) {
+    public void setCollections(LinkedHashMap<String, LootCollection> collections) {
         this.collections = collections;
     }
     

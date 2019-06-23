@@ -29,11 +29,11 @@ import java.util.HashMap;
  * @author Lukas Mansour
  */
 class VhatLootsBaseCommand extends BaseCommand {
-    static String[] formatMsg(HashMap<String, String> placeHolders, String... messages) {
+    static String[] formatMsg(HashMap<String, Object> placeHolders, String... messages) {
         return MessageHelper.formatMsg(placeHolders, messages);
     }
     
-    static String formatMsg(HashMap<String, String> placeHolders, String message) {
+    static String formatMsg(HashMap<String, Object> placeHolders, String message) {
         return MessageHelper.formatMsg(placeHolders, message);
     }
     

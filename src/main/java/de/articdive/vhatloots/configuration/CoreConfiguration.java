@@ -44,7 +44,7 @@ public enum CoreConfiguration implements ConfigurationNode {
             "# | Database Configuration | #",
             "# +------------------------+ #",
             "##############################",
-            "# Valid DB types: h2, mysql, oracle, postgresql, sqlite, sqlserver.",
+            "# Valid DB objects: h2, mysql, oracle, postgresql, sqlite, sqlserver.",
             "# For h2 and sqlite: ",
             "# Database hostname becomes file location (./) is relativ to your server's spigot.jar",
             "# Database schema becomes the name of the h2 or sqlite file."

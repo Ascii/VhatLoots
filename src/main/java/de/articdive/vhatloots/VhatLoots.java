@@ -22,7 +22,7 @@ import de.articdive.enum_to_configuration.EnumConfiguration;
 import de.articdive.enum_to_configuration.EnumConfigurationBuilder;
 import de.articdive.vhatloots.commands.CommandHandler;
 import de.articdive.vhatloots.configuration.CoreConfiguration;
-import de.articdive.vhatloots.configuration.gson.LootHandler;
+import de.articdive.vhatloots.configuration.loot.LootHandler;
 import de.articdive.vhatloots.database.DatabaseHandler;
 import de.articdive.vhatloots.helpers.LoggingHelper;
 import de.articdive.vhatloots.language.LanguageConfigurationNode;

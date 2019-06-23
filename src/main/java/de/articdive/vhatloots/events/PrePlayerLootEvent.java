@@ -18,7 +18,7 @@
 
 package de.articdive.vhatloots.events;
 
-import de.articdive.vhatloots.configuration.gson.objects.Loot;
+import de.articdive.vhatloots.configuration.loot.objects.LootConfiguration;
 import de.articdive.vhatloots.events.abstractions.PreLootEvent;
 import de.articdive.vhatloots.objects.LootContainer;
 import org.bukkit.entity.Player;
@@ -31,20 +31,20 @@ import org.jetbrains.annotations.NotNull;
 public class PrePlayerLootEvent extends PreLootEvent {
     private static final HandlerList handlers = new HandlerList();
     private final Player looter;
-    private final Loot loot;
+    private final LootConfiguration lootConfiguration;
     private final LootContainer container;
     
     /**
      * Creates a new event with the given data
      *
      * @param looter       The Player who is looting
-     * @param loot         The loot that the Player looted
+     * @param lootConfiguration         The lootConfiguration that the Player looted
      * @param container    The LootContainer being looted or null if no container was involved
      * @param lootingBonus The bonus amount of looting probability
      */
-    public PrePlayerLootEvent(Player looter, Loot loot, LootContainer container, double lootingBonus) {
+    public PrePlayerLootEvent(Player looter, LootConfiguration lootConfiguration, LootContainer container, double lootingBonus) {
         this.looter = looter;
-        this.loot = loot;
+        this.lootConfiguration = lootConfiguration;
         this.container = container;
         this.lootingBonus = lootingBonus;
     }
@@ -65,12 +65,12 @@ public class PrePlayerLootEvent extends PreLootEvent {
     }
     
     /**
-     * Returns the PhatLoot that provided the loot
+     * Returns the PhatLoot that provided the lootConfiguration
      *
-     * @return The PhatLoot that provided the loot
+     * @return The PhatLoot that provided the lootConfiguration
      */
-    public Loot getLoot() {
-        return loot;
+    public LootConfiguration getLootConfiguration() {
+        return lootConfiguration;
     }
     
     /**

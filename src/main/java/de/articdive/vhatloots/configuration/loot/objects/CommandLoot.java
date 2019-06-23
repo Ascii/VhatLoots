@@ -16,44 +16,47 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package de.articdive.vhatloots.configuration.gson.objects;
+package de.articdive.vhatloots.configuration.loot.objects;
 
 import de.articdive.vhatloots.events.objects.LootBundle;
-import de.articdive.vhatloots.helpers.RandomHelper;
 
 /**
  * @author Lukas Mansour
  */
-public class XPLoot extends LootObject {
-    private int lowerXP;
-    private int upperXP;
+public class CommandLoot extends LootObject {
+    private String command;
+    private boolean console;
     
-    public XPLoot(String name, double probability, int lowerXP, int upperXP) {
+    public CommandLoot(String name, double probability, String command, boolean console) {
         super(name, probability);
-        this.lowerXP = lowerXP;
-        this.upperXP = upperXP;
-    }
-    
-    public int getLowerXP() {
-        return lowerXP;
-    }
-    
-    public void setLowerXP(int lowerXP) {
-        this.lowerXP = lowerXP;
-    }
-    
-    public int getUpperXP() {
-        return upperXP;
-    }
-    
-    public void setUpperXP(int upperXP) {
-        this.upperXP = upperXP;
+        this.command = command;
+        this.console = console;
     }
     
     @Override
     public void generateLoot(LootBundle bundle, double lootingBonus) {
         if (rollDice(lootingBonus)) {
-            bundle.addExp(RandomHelper.rollForInt(lowerXP, upperXP));
+            if (console) {
+                bundle.addCommand("console:" + command);
+            } else {
+                bundle.addCommand(command);
+            }
         }
+    }
+    
+    public String getCommand() {
+        return command;
+    }
+    
+    public void setCommand(String command) {
+        this.command = command;
+    }
+    
+    public boolean isConsole() {
+        return console;
+    }
+    
+    public void setConsole(boolean console) {
+        this.console = console;
     }
 }

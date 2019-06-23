@@ -18,7 +18,7 @@
 
 package de.articdive.vhatloots.events;
 
-import de.articdive.vhatloots.configuration.gson.objects.Loot;
+import de.articdive.vhatloots.configuration.loot.objects.LootConfiguration;
 import de.articdive.vhatloots.events.abstractions.LootEvent;
 import de.articdive.vhatloots.events.objects.LootBundle;
 import de.articdive.vhatloots.objects.LootContainer;
@@ -29,20 +29,20 @@ import org.jetbrains.annotations.NotNull;
 public class PlayerLootEvent extends LootEvent {
     private static final HandlerList handlers = new HandlerList();
     private final Player looter;
-    private final Loot loot;
+    private final LootConfiguration lootConfiguration;
     private final LootContainer container;
     
     /**
      * Creates a new event with the given data
      *
      * @param looter     The Player who is looting
-     * @param loot       The loot that the Player looted
+     * @param lootConfiguration       The lootConfiguration that the Player looted
      * @param container  The LootContainer being looted or null if no container was involved
-     * @param lootBundle The Loot that the Player received
+     * @param lootBundle The LootConfiguration that the Player received
      */
-    public PlayerLootEvent(Player looter, Loot loot, LootContainer container, LootBundle lootBundle) {
+    public PlayerLootEvent(Player looter, LootConfiguration lootConfiguration, LootContainer container, LootBundle lootBundle) {
         this.looter = looter;
-        this.loot = loot;
+        this.lootConfiguration = lootConfiguration;
         this.container = container;
         this.lootBundle = lootBundle;
     }
@@ -57,12 +57,12 @@ public class PlayerLootEvent extends LootEvent {
     }
     
     /**
-     * Returns the loot that provided the lootbundle
+     * Returns the lootConfiguration that provided the lootbundle
      *
-     * @return The loot that provided the lootbundle
+     * @return The lootConfiguration that provided the lootbundle
      */
-    public Loot getPhatLoot() {
-        return loot;
+    public LootConfiguration getPhatLoot() {
+        return lootConfiguration;
     }
     
     /**

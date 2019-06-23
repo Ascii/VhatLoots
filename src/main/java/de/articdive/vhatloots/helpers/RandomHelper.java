@@ -23,44 +23,18 @@ import java.util.Random;
 public class RandomHelper {
     private static Random random = new Random();
     
-    /**
-     * Returns a random int between 0 (inclusive) and y (inclusive)
-     *
-     * @param upper y
-     * @return a random int between 0 and y
-     */
     public static int rollForInt(int upper) {
         return random.nextInt(upper + 1); //+1 is needed to make it inclusive
     }
     
-    /**
-     * Returns a random int between x (inclusive) and y (inclusive)
-     *
-     * @param lower x
-     * @param upper y
-     * @return a random int between x and y
-     */
     public static int rollForInt(int lower, int upper) {
         return random.nextInt(upper + 1 - lower) + lower;
     }
     
-    /**
-     * Returns a random double between 0 (inclusive) and y (exclusive)
-     *
-     * @param upper y
-     * @return a random double between 0 and y
-     */
     public static double rollForDouble(double upper) {
         return random.nextDouble() * upper;
     }
     
-    /**
-     * Returns a random double between x (inclusive) and y (exclusive)
-     *
-     * @param lower x
-     * @param upper y
-     * @return a random double between x and y
-     */
     public static double rollForDouble(int lower, int upper) {
         return random.nextInt(upper + 1 - lower) + lower;
     }

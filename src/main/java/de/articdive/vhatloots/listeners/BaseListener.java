@@ -40,7 +40,7 @@ public abstract class BaseListener implements Listener {
     }
     
     
-    static String formatMsg(HashMap<String, String> placeholders, String message) {
+    static String formatMsg(HashMap<String, Object> placeholders, String message) {
         return MessageHelper.formatMsg(placeholders, message);
     }
     

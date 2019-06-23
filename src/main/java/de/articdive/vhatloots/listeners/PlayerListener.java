@@ -20,8 +20,8 @@ package de.articdive.vhatloots.listeners;
 
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
-import de.articdive.vhatloots.configuration.gson.LootHandler;
-import de.articdive.vhatloots.configuration.gson.objects.Loot;
+import de.articdive.vhatloots.configuration.loot.LootHandler;
+import de.articdive.vhatloots.configuration.loot.objects.LootConfiguration;
 import de.articdive.vhatloots.events.PlayerLootEvent;
 import de.articdive.vhatloots.events.PrePlayerLootEvent;
 import de.articdive.vhatloots.events.abstractions.PreLootEvent;
@@ -84,25 +84,25 @@ public class PlayerListener extends BaseListener {
         
         org.bukkit.entity.Player p = event.getPlayer();
         
-        HashMap<String, String> localPlayerHolders = new HashMap<>();
-        String lootName = lootContainer.getString("loot");
+        HashMap<String, Object> localPlayerHolders = new HashMap<>();
+        String lootName = lootContainer.getString("lootConfiguration");
         localPlayerHolders.put("lootName", lootName);
         if (!lootHandler.exists(lootName)) {
             p.sendMessage(formatMsg(localPlayerHolders, getMessage(p, LanguageConfigurationNode.LOOTBOX_MISCONFIGURED)));
             event.setCancelled(true);
             return;
         }
-        Loot loot = lootHandler.get(lootName);
+        LootConfiguration lootConfiguration = lootHandler.get(lootName);
         
         boolean lootable = false;
         UUID uuid = p.getUniqueId();
-        if (loot.isGlobal()) {
+        if (lootConfiguration.isGlobal()) {
             uuid = GLOBAL_UUID;
         }
         if ((cooldowns.containsKey(uuid))) {
             DateTime cooldownTime = new DateTime(cooldowns.get(uuid), DateTimeZone.UTC);
             DateTime now = new DateTime(DateTimeZone.UTC);
-            Period delay = new Period(0, 0, 0, loot.getDelay());
+            Period delay = new Period(0, 0, 0, lootConfiguration.getDelay());
             localPlayerHolders.put("years", "");
             localPlayerHolders.put("months", "");
             localPlayerHolders.put("weeks", "");
@@ -153,18 +153,18 @@ public class PlayerListener extends BaseListener {
         }
         event.setCancelled(true);
         if (lootable) {
-            PreLootEvent preLootEvent = new PrePlayerLootEvent(p, loot, lootContainer, 0);
+            PreLootEvent preLootEvent = new PrePlayerLootEvent(p, lootConfiguration, lootContainer, 0);
             Bukkit.getPluginManager().callEvent(preLootEvent);
             if (preLootEvent.isCancelled()) {
                 return;
             }
-            LootBundle lootBundle = loot.generateLoot(0);
-            PlayerLootEvent lootEvent = new PlayerLootEvent(p, loot, lootContainer, lootBundle);
+            LootBundle lootBundle = lootConfiguration.generateLoot(0);
+            PlayerLootEvent lootEvent = new PlayerLootEvent(p, lootConfiguration, lootContainer, lootBundle);
             Bukkit.getPluginManager().callEvent(event);
             if (lootEvent.isCancelled()) {
                 return;
             }
-            LootHelper.giveLootBundle(p, loot, lootBundle);
+            LootHelper.giveLootBundle(p, lootConfiguration, lootBundle);
             
             cooldowns.put(uuid, new DateTime(DateTimeZone.UTC).toString());
             lootContainer.setString("cooldowns", new Gson().toJson(cooldowns));

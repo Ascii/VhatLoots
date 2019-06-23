@@ -18,13 +18,13 @@
 
 package de.articdive.vhatloots.helpers;
 
-import de.articdive.vhatloots.configuration.gson.objects.Loot;
+import de.articdive.vhatloots.configuration.loot.objects.LootConfiguration;
 import de.articdive.vhatloots.events.objects.LootBundle;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 
 public class LootHelper {
-    public static void giveLootBundle(Player player, Loot loot, LootBundle lootBundle) {
+    public static void giveLootBundle(Player player, LootConfiguration lootConfiguration, LootBundle lootBundle) {
         if (lootBundle.getMoney() > 0) {
             // TODO: Give player money.
             // TODO: Send message.
@@ -43,7 +43,7 @@ public class LootHelper {
                 // TODO: Send message.
             }
         }
-        if (loot.isAutoLoot()) {
+        if (lootConfiguration.isAutoLoot()) {
             // TODO: Put directly into his inventory
         } else {
             // TODO: Open inventory

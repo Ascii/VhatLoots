@@ -16,18 +16,16 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package de.articdive.vhatloots.configuration.gson;
+package de.articdive.vhatloots.configuration.loot;
 
 import com.google.gson.FieldNamingPolicy;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.reflect.TypeToken;
 import de.articdive.vhatloots.VhatLoots;
-import de.articdive.vhatloots.configuration.gson.objects.Loot;
-import de.articdive.vhatloots.configuration.gson.objects.CollectionLoot;
-import de.articdive.vhatloots.configuration.gson.objects.ItemLoot;
-import de.articdive.vhatloots.configuration.gson.objects.MoneyLoot;
-import de.articdive.vhatloots.configuration.gson.objects.XPLoot;
+import de.articdive.vhatloots.configuration.loot.objects.LootCollection;
+import de.articdive.vhatloots.configuration.loot.objects.LootConfiguration;
+import de.articdive.vhatloots.configuration.loot.objects.LootObject;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -56,7 +54,7 @@ public class LootHandler {
             .setFieldNamingPolicy(FieldNamingPolicy.UPPER_CAMEL_CASE)
             .create();
     private final File lootFile = new File(main.getDataFolder() + File.separator + "loot.json");
-    private Map<String, Loot> loot = new HashMap<>();
+    private Map<String, LootConfiguration> loot = new HashMap<>();
     
     private LootHandler() {
         if (!lootFile.getParentFile().mkdirs() && !lootFile.getParentFile().isDirectory()) {
@@ -64,22 +62,22 @@ public class LootHandler {
             return;
         }
         if (!lootFile.exists() && !unpackLootJson()) {
-            main.getLogger().severe("Loot.json could not be copied out of the jar.");
+            main.getLogger().severe("LootConfiguration.json could not be copied out of the jar.");
             return;
         }
         deSerialize();
     }
     
-    public List<Loot> getAll() {
+    public List<LootConfiguration> getAll() {
         return new ArrayList<>(loot.values());
     }
     
-    public void addLootConfiguration(Loot loot) {
-        this.loot.put(loot.getName(), loot);
+    public void addLootConfiguration(LootConfiguration lootConfiguration) {
+        this.loot.put(lootConfiguration.getName(), lootConfiguration);
     }
     
-    public void removeLootConfiguration(Loot loot) {
-        this.loot.remove(loot.getName());
+    public void removeLootConfiguration(LootConfiguration lootConfiguration) {
+        this.loot.remove(lootConfiguration.getName());
     }
     
     private void serialize() {
@@ -95,17 +93,26 @@ public class LootHandler {
     private void deSerialize() {
         try {
             FileReader reader = new FileReader(lootFile);
-            Type collectionType = new TypeToken<List<Loot>>() {
+            Type collectionType = new TypeToken<List<LootConfiguration>>() {
             }.getType();
-            List<Loot> loot = gson.fromJson(reader, collectionType);
-            if (loot == null || loot.isEmpty()) {
-                loot = new ArrayList<>();
+            List<LootConfiguration> lootConfigurations = gson.fromJson(reader, collectionType);
+            if (lootConfigurations == null || lootConfigurations.isEmpty()) {
+                lootConfigurations = new ArrayList<>();
             }
             reader.close();
-            HashMap<String, Loot> newLoot = new HashMap<>();
-            for (Loot lut : loot) {
-                newLoot.put(lut.getName(), lut);
-                setCollectionNames(lut.getCollections(), "", lut);
+            HashMap<String, LootConfiguration> newLoot = new HashMap<>();
+            for (LootConfiguration lootConfiguration : lootConfigurations) {
+                newLoot.put(lootConfiguration.getName(), lootConfiguration);
+                LootCollection rootCollection = lootConfiguration.getLoot();
+                String name = lootConfiguration.getName();
+                lootConfiguration.addCollectionPath(name, rootCollection);
+                rootCollection.setName(name);
+                rootCollection.setPath(name);
+                updateNestedObjects(rootCollection.getXp());
+                updateNestedObjects(rootCollection.getMoney());
+                updateNestedObjects(rootCollection.getItems());
+                updateNestedObjects(rootCollection.getCommands());
+                updateNestedCollections(rootCollection.getCollections(), name, lootConfiguration);
             }
             this.loot = newLoot;
         } catch (IOException e) {
@@ -113,31 +120,15 @@ public class LootHandler {
         }
     }
     
-    private void setXPNames(LinkedHashMap<String, XPLoot> xpMap) {
-        List<String> keys = new ArrayList<>(xpMap.keySet());
-        for (int i = 0; i < xpMap.size(); i++) {
-            XPLoot xp = xpMap.values().toArray(new XPLoot[0])[i];
-            xp.setName(keys.get(i));
+    private void updateNestedObjects(LinkedHashMap<String, ? extends LootObject> lootObjectMap) {
+        List<String> keys = new ArrayList<>(lootObjectMap.keySet());
+        for (int i = 0; i < lootObjectMap.size(); i++) {
+            LootObject lootObject = lootObjectMap.values().toArray(new LootObject[0])[i];
+            lootObject.setName(keys.get(i));
         }
     }
     
-    private void setMoneyNames(LinkedHashMap<String, MoneyLoot> moneyMap) {
-        List<String> keys = new ArrayList<>(moneyMap.keySet());
-        for (int i = 0; i < moneyMap.size(); i++) {
-            MoneyLoot money = moneyMap.values().toArray(new MoneyLoot[0])[i];
-            money.setName(keys.get(i));
-        }
-    }
-    
-    private void setItemNames(LinkedHashMap<String, ItemLoot> itemMap) {
-        List<String> keys = new ArrayList<>(itemMap.keySet());
-        for (int i = 0; i < itemMap.size(); i++) {
-            ItemLoot item = itemMap.values().toArray(new ItemLoot[0])[i];
-            item.setName(keys.get(i));
-        }
-    }
-    
-    private void setCollectionNames(LinkedHashMap<String, CollectionLoot> collectionMap, String root, Loot loot) {
+    private void updateNestedCollections(LinkedHashMap<String, LootCollection> collectionMap, String root, LootConfiguration lootConfiguration) {
         List<String> keys = new ArrayList<>(collectionMap.keySet());
         for (int i = 0; i < collectionMap.size(); i++) {
             String name = keys.get(i);
@@ -146,14 +137,14 @@ public class LootHandler {
             if (root.isEmpty()) {
                 fullPath = fullPath.substring(1);
             }
-            CollectionLoot collection = collectionMap.values().toArray(new CollectionLoot[0])[i];
-            loot.addCollectionPath(fullPath, collection);
+            LootCollection collection = collectionMap.values().toArray(new LootCollection[0])[i];
+            lootConfiguration.addCollectionPath(fullPath, collection);
             collection.setName(name);
             collection.setPath(fullPath);
-            setXPNames(collection.getXp());
-            setMoneyNames(collection.getMoney());
-            setItemNames(collection.getItems());
-            setCollectionNames(collection.getCollections(), fullPath, loot);
+            updateNestedObjects(collection.getXp());
+            updateNestedObjects(collection.getMoney());
+            updateNestedObjects(collection.getItems());
+            updateNestedCollections(collection.getCollections(), fullPath, lootConfiguration);
         }
     }
     
@@ -183,7 +174,7 @@ public class LootHandler {
         }
     }
     
-    public Loot get(String name) {
+    public LootConfiguration get(String name) {
         return loot.get(name);
     }
     
@@ -192,7 +183,14 @@ public class LootHandler {
     }
     
     public void update() {
+        update(false);
+    }
+    
+    public void update(boolean updateNested) {
         serialize();
+        if (updateNested) {
+            deSerialize();
+        }
     }
     
     public static LootHandler getInstance() {

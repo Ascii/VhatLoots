@@ -16,7 +16,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package de.articdive.vhatloots.configuration.gson.objects;
+package de.articdive.vhatloots.configuration.loot.objects;
 
 import de.articdive.vhatloots.events.objects.LootBundle;
 import org.bukkit.inventory.ItemStack;

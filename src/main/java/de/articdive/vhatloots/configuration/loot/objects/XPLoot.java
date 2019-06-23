@@ -16,7 +16,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package de.articdive.vhatloots.configuration.gson.objects;
+package de.articdive.vhatloots.configuration.loot.objects;
 
 import de.articdive.vhatloots.events.objects.LootBundle;
 import de.articdive.vhatloots.helpers.RandomHelper;
@@ -24,37 +24,36 @@ import de.articdive.vhatloots.helpers.RandomHelper;
 /**
  * @author Lukas Mansour
  */
-public class MoneyLoot extends LootObject {
-    private int lowerMoney;
-    private int upperMoney;
+public class XPLoot extends LootObject {
+    private int lowerXP;
+    private int upperXP;
     
-    public MoneyLoot(String name, double probability, int lowerMoney, int upperMoney) {
+    public XPLoot(String name, double probability, int lowerXP, int upperXP) {
         super(name, probability);
-        this.lowerMoney = lowerMoney;
-        this.upperMoney = upperMoney;
+        this.lowerXP = lowerXP;
+        this.upperXP = upperXP;
     }
     
-    public int getLowerMoney() {
-        return lowerMoney;
+    public int getLowerXP() {
+        return lowerXP;
     }
     
-    public void setLowerMoney(int lowerMoney) {
-        this.lowerMoney = lowerMoney;
+    public void setLowerXP(int lowerXP) {
+        this.lowerXP = lowerXP;
     }
     
-    public int getUpperMoney() {
-        return upperMoney;
+    public int getUpperXP() {
+        return upperXP;
     }
     
-    public void setUpperMoney(int upperMoney) {
-        this.upperMoney = upperMoney;
+    public void setUpperXP(int upperXP) {
+        this.upperXP = upperXP;
     }
     
     @Override
     public void generateLoot(LootBundle bundle, double lootingBonus) {
         if (rollDice(lootingBonus)) {
-            bundle.addMoney(RandomHelper.rollForDouble(lowerMoney, upperMoney));
+            bundle.addExp(RandomHelper.rollForInt(lowerXP, upperXP));
         }
-        
     }
 }

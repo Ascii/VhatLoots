@@ -16,7 +16,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package de.articdive.vhatloots.configuration.gson.objects;
+package de.articdive.vhatloots.configuration.loot.objects;
 
 import de.articdive.vhatloots.events.objects.LootBundle;
 import de.articdive.vhatloots.helpers.RandomHelper;
@@ -24,34 +24,37 @@ import de.articdive.vhatloots.helpers.RandomHelper;
 /**
  * @author Lukas Mansour
  */
-public abstract class LootObject {
-    private double probability;
-    private transient String name;
+public class MoneyLoot extends LootObject {
+    private int lowerMoney;
+    private int upperMoney;
     
-    LootObject(String name, double probability) {
-        this.name = name;
-        this.probability = probability;
+    public MoneyLoot(String name, double probability, int lowerMoney, int upperMoney) {
+        super(name, probability);
+        this.lowerMoney = lowerMoney;
+        this.upperMoney = upperMoney;
     }
     
-    boolean rollDice(double lootingBonus) {
-        return RandomHelper.rollForDouble(100) <= probability + lootingBonus;
+    public int getLowerMoney() {
+        return lowerMoney;
     }
     
-    public abstract void generateLoot(LootBundle bundle, double lootingBonus);
-    
-    public String getName() {
-        return name;
+    public void setLowerMoney(int lowerMoney) {
+        this.lowerMoney = lowerMoney;
     }
     
-    public void setName(String name) {
-        this.name = name;
+    public int getUpperMoney() {
+        return upperMoney;
     }
     
-    public double getProbability() {
-        return probability;
+    public void setUpperMoney(int upperMoney) {
+        this.upperMoney = upperMoney;
     }
     
-    public void setProbability(double probability) {
-        this.probability = probability;
+    @Override
+    public void generateLoot(LootBundle bundle, double lootingBonus) {
+        if (rollDice(lootingBonus)) {
+            bundle.addMoney(RandomHelper.rollForDouble(lowerMoney, upperMoney));
+        }
+        
     }
 }

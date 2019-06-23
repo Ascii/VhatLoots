@@ -62,7 +62,7 @@ public class MessageHelper {
      */
     private static String versionString;
     
-    public static String[] formatMsg(HashMap<String, String> placeholders, String... messages) {
+    public static String[] formatMsg(HashMap<String, Object> placeholders, String... messages) {
         placeholders.putAll(globalPlaceHolders);
         List<String> formattedMsgs = new ArrayList<>();
         for (String msg : messages) {
@@ -72,7 +72,7 @@ public class MessageHelper {
                     if (placeholders.get(m.group(i)) == null) {
                         msg = msg.replace("{" + m.group(i) + "}", "");
                     } else {
-                        msg = msg.replace("{" + m.group(i) + "}", placeholders.get(m.group(i)));
+                        msg = msg.replace("{" + m.group(i) + "}", String.valueOf(placeholders.get(m.group(i))));
                     }
                 }
             }
@@ -81,13 +81,13 @@ public class MessageHelper {
         return formattedMsgs.toArray(new String[0]);
     }
     
-    public static String formatMsg(HashMap<String, String> placeholders, String message) {
+    public static String formatMsg(HashMap<String, Object> placeholders, String message) {
         placeholders.putAll(globalPlaceHolders);
         Matcher m = placeHolderPattern.matcher(message);
         while (m.find()) {
             for (int i = 1; i <= m.groupCount(); i++) {
                 if (placeholders.get(m.group(i)) != null) {
-                    message = message.replace("{" + m.group(i) + "}", placeholders.get(m.group(i)));
+                    message = message.replace("{" + m.group(i) + "}", String.valueOf(placeholders.get(m.group(i))));
                 }
             }
         }
