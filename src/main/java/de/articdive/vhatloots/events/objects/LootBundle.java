@@ -28,6 +28,7 @@ import java.util.List;
  */
 public class LootBundle {
     private List<ItemStack> itemList = new ArrayList<>();
+    private List<String> commands = new ArrayList<>();
     private double money = 0.0;
     private int exp = 0;
     
@@ -72,5 +73,19 @@ public class LootBundle {
     
     public void removeItem(ItemStack itemStack) {
         itemList.remove(itemStack);
+    }
+    
+    public void addCommand(String command) {
+        if (command == null || command.isEmpty()) {
+            return;
+        }
+        if (command.startsWith("/")) {
+            command = command.substring(1);
+        }
+        commands.add(command);
+    }
+    
+    public List<String> getCommands() {
+        return commands;
     }
 }

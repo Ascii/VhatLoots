@@ -40,11 +40,14 @@ public class Loot {
     private int maxRollAmountMoney;
     private int minRollAmountItems;
     private int maxRollAmountItems;
+    private int minRollAmountCommands;
+    private int maxRollAmountCommands;
     private int minRollAmountCollections;
     private int maxRollAmountCollections;
     private LinkedHashMap<String, XPLoot> xp;
     private LinkedHashMap<String, MoneyLoot> money;
     private LinkedHashMap<String, ItemLoot> items;
+    private LinkedHashMap<String, CommandLoot> commands;
     private LinkedHashMap<String, CollectionLoot> collections;
     
     private transient HashMap<String, CollectionLoot> lootPaths;
@@ -129,6 +132,22 @@ public class Loot {
         this.maxRollAmountMoney = maxRollAmountMoney;
     }
     
+    public int getMinRollAmountCommands() {
+        return minRollAmountCommands;
+    }
+    
+    public void setMinRollAmountCommands(int minRollAmountCommands) {
+        this.minRollAmountCommands = minRollAmountCommands;
+    }
+    
+    public int getMaxRollAmountCommands() {
+        return maxRollAmountCommands;
+    }
+    
+    public void setMaxRollAmountCommands(int maxRollAmountCommands) {
+        this.maxRollAmountCommands = maxRollAmountCommands;
+    }
+    
     public int getMaxRollAmountCollections() {
         return maxRollAmountCollections;
     }
@@ -189,6 +208,18 @@ public class Loot {
         this.collections = collections;
     }
     
+    
+    public LinkedHashMap<String, CommandLoot> getCommands() {
+        if (commands == null) {
+            return new LinkedHashMap<>();
+        }
+        return commands;
+    }
+    
+    public void setCommands(LinkedHashMap<String, CommandLoot> commands) {
+        this.commands = commands;
+    }
+    
     public void addCollectionPath(String path, CollectionLoot collection) {
         if (lootPaths == null) {
             lootPaths = new HashMap<>();
@@ -212,6 +243,7 @@ public class Loot {
         boolean collectiveXP = false,
                 collectiveMoney = false,
                 collectiveItems = false,
+                collectiveCommands = false,
                 collectiveCollections = false;
         if (maxRollAmountXP <= 0) {
             for (XPLoot xp : this.xp.values()) {
@@ -234,6 +266,13 @@ public class Loot {
         } else {
             collectiveItems = true;
         }
+        if (maxRollAmountCommands <= 0) {
+            for (CommandLoot command : this.commands.values()) {
+                command.generateLoot(lootBundle, lootingBonus);
+            }
+        } else {
+            collectiveCommands = true;
+        }
         if (maxRollAmountCollections <= 0) {
             for (CollectionLoot collection : this.collections.values()) {
                 collection.generateLoot(lootBundle, lootingBonus);
@@ -249,6 +288,9 @@ public class Loot {
         }
         if (collectiveItems) {
             generateLootObject(new ArrayList<>(this.items.values()), minRollAmountItems, maxRollAmountItems, lootBundle, lootingBonus);
+        }
+        if (collectiveCommands) {
+            generateLootObject(new ArrayList<>(this.commands.values()), minRollAmountCommands, maxRollAmountCommands, lootBundle, lootingBonus);
         }
         if (collectiveCollections) {
             generateLootObject(new ArrayList<>(this.collections.values()), minRollAmountCollections, maxRollAmountCollections, lootBundle, lootingBonus);

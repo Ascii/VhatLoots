@@ -26,6 +26,7 @@ import de.articdive.vhatloots.events.PlayerLootEvent;
 import de.articdive.vhatloots.events.PrePlayerLootEvent;
 import de.articdive.vhatloots.events.abstractions.PreLootEvent;
 import de.articdive.vhatloots.events.objects.LootBundle;
+import de.articdive.vhatloots.helpers.LootHelper;
 import de.articdive.vhatloots.language.LanguageConfigurationNode;
 import de.articdive.vhatloots.objects.LootContainer;
 import de.articdive.vhatloots.objects.Player;
@@ -47,6 +48,7 @@ import java.util.UUID;
  * @author Lukas Mansour
  */
 public class PlayerListener extends BaseListener {
+    private static final UUID GLOBAL_UUID = UUID.fromString("e6b4943f-e508-4d43-86ab-00ede9dc6618");
     private final LootHandler lootHandler = LootHandler.getInstance();
     
     public PlayerListener() {
@@ -93,8 +95,12 @@ public class PlayerListener extends BaseListener {
         Loot loot = lootHandler.get(lootName);
         
         boolean lootable = false;
-        if (cooldowns.containsKey(p.getUniqueId())) {
-            DateTime cooldownTime = new DateTime(cooldowns.get(p.getUniqueId()), DateTimeZone.UTC);
+        UUID uuid = p.getUniqueId();
+        if (loot.isGlobal()) {
+            uuid = GLOBAL_UUID;
+        }
+        if ((cooldowns.containsKey(uuid))) {
+            DateTime cooldownTime = new DateTime(cooldowns.get(uuid), DateTimeZone.UTC);
             DateTime now = new DateTime(DateTimeZone.UTC);
             Period delay = new Period(0, 0, 0, loot.getDelay());
             localPlayerHolders.put("years", "");
@@ -158,8 +164,9 @@ public class PlayerListener extends BaseListener {
             if (lootEvent.isCancelled()) {
                 return;
             }
+            LootHelper.giveLootBundle(p, loot, lootBundle);
             
-            cooldowns.put(p.getUniqueId(), new DateTime(DateTimeZone.UTC).toString());
+            cooldowns.put(uuid, new DateTime(DateTimeZone.UTC).toString());
             lootContainer.setString("cooldowns", new Gson().toJson(cooldowns));
             lootContainer.saveIt();
         }

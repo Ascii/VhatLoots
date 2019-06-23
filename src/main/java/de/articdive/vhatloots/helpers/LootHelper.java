@@ -18,18 +18,35 @@
 
 package de.articdive.vhatloots.helpers;
 
+import de.articdive.vhatloots.configuration.gson.objects.Loot;
 import de.articdive.vhatloots.events.objects.LootBundle;
+import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 
 public class LootHelper {
-    private static void giveLootBundle(Player player, LootBundle lootBundle) {
+    public static void giveLootBundle(Player player, Loot loot, LootBundle lootBundle) {
         if (lootBundle.getMoney() > 0) {
             // TODO: Give player money.
+            // TODO: Send message.
         }
         if (lootBundle.getExp() > 0) {
             player.giveExp(lootBundle.getExp());
             // TODO: Send message.
         }
-        // TODO: Give items.
+        if (lootBundle.getCommands().size() > 0) {
+            for (String command : lootBundle.getCommands()) {
+                if (command.startsWith("console:")) {
+                    Bukkit.getServer().dispatchCommand(Bukkit.getConsoleSender(), command);
+                } else {
+                    player.performCommand(command);
+                }
+                // TODO: Send message.
+            }
+        }
+        if (loot.isAutoLoot()) {
+            // TODO: Put directly into his inventory
+        } else {
+            // TODO: Open inventory
+        }
     }
 }

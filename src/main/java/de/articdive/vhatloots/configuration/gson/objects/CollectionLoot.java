@@ -36,11 +36,14 @@ public class CollectionLoot extends LootObject {
     private int maxRollAmountMoney;
     private int minRollAmountItems;
     private int maxRollAmountItems;
+    private int minRollAmountCommands;
+    private int maxRollAmountCommands;
     private int minRollAmountCollections;
     private int maxRollAmountCollections;
     private LinkedHashMap<String, XPLoot> xp;
     private LinkedHashMap<String, MoneyLoot> money;
     private LinkedHashMap<String, ItemLoot> items;
+    private LinkedHashMap<String, CommandLoot> commands;
     private LinkedHashMap<String, CollectionLoot> collections;
     
     public CollectionLoot(String name, double probability) {
@@ -53,9 +56,12 @@ public class CollectionLoot extends LootObject {
         maxRollAmountMoney = 0;
         maxRollAmountItems = 0;
         maxRollAmountCollections = 0;
+        minRollAmountCommands = 0;
+        maxRollAmountCommands = 0;
         this.xp = new LinkedHashMap<>();
         this.money = new LinkedHashMap<>();
         this.items = new LinkedHashMap<>();
+        this.commands = new LinkedHashMap<>();
         this.collections = new LinkedHashMap<>();
     }
     
@@ -199,6 +205,22 @@ public class CollectionLoot extends LootObject {
         this.maxRollAmountCollections = maxRollAmountCollections;
     }
     
+    public int getMaxRollAmountCommands() {
+        return maxRollAmountCommands;
+    }
+    
+    public void setMaxRollAmountCommands(int maxRollAmountCommands) {
+        this.maxRollAmountCommands = maxRollAmountCommands;
+    }
+    
+    public int getMinRollAmountCommands() {
+        return minRollAmountCommands;
+    }
+    
+    public void setMinRollAmountCommands(int minRollAmountCommands) {
+        this.minRollAmountCommands = minRollAmountCommands;
+    }
+    
     public int getMaxRollAmountXP() {
         return maxRollAmountXP;
     }
@@ -249,5 +271,16 @@ public class CollectionLoot extends LootObject {
     
     public void setCollections(LinkedHashMap<String, CollectionLoot> collections) {
         this.collections = collections;
+    }
+    
+    public LinkedHashMap<String, CommandLoot> getCommands() {
+        if (commands == null) {
+            return new LinkedHashMap<>();
+        }
+        return commands;
+    }
+    
+    public void setCommands(LinkedHashMap<String, CommandLoot> commands) {
+        this.commands = commands;
     }
 }
