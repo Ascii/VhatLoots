@@ -78,8 +78,8 @@
                             </filters>
                             <relocations>
                                 <relocation>
-                                    <pattern>co.aikar.commands</pattern>
-                                    <shadedPattern>${relocationLocation}.co.aikar.commands</shadedPattern>
+                                    <pattern>co.aikar.commandList</pattern>
+                                    <shadedPattern>${relocationLocation}.co.aikar.commandList</shadedPattern>
                                 </relocation>
                                 <relocation>
                                     <pattern>com.electronwill.nightconfig</pattern>
@@ -309,7 +309,7 @@
             <version>2.8.1</version>
             <scope>provided</scope>
         </dependency>
-        <!-- Use Aikar's commands to handle commands. -->
+        <!-- Use Aikar's commandList to handle commandList. -->
         <dependency>
             <groupId>co.aikar</groupId>
             <artifactId>acf-paper</artifactId> <!-- Don't forget to replace this -->

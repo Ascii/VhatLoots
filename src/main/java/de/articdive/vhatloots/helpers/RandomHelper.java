@@ -21,7 +21,7 @@ package de.articdive.vhatloots.helpers;
 import java.util.Random;
 
 public class RandomHelper {
-    private static Random random = new Random();
+    private static final Random random = new Random();
     
     public static int rollForInt(int upper) {
         return random.nextInt(upper + 1); //+1 is needed to make it inclusive

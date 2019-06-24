@@ -18,7 +18,6 @@
 
 package de.articdive.vhatloots.configuration.loot;
 
-import com.google.gson.FieldNamingPolicy;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.reflect.TypeToken;
@@ -51,7 +50,6 @@ public class LootHandler {
     private final Gson gson = new GsonBuilder()
             .serializeNulls()
             .setPrettyPrinting()
-            .setFieldNamingPolicy(FieldNamingPolicy.UPPER_CAMEL_CASE)
             .create();
     private final File lootFile = new File(main.getDataFolder() + File.separator + "loot.json");
     private Map<String, LootConfiguration> loot = new HashMap<>();

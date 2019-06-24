@@ -25,7 +25,6 @@ import co.aikar.commands.annotation.CommandPermission;
 import co.aikar.commands.annotation.Default;
 import co.aikar.commands.annotation.Description;
 import co.aikar.commands.annotation.HelpCommand;
-import co.aikar.commands.annotation.Optional;
 import co.aikar.commands.annotation.Subcommand;
 import co.aikar.commands.annotation.Syntax;
 import de.articdive.vhatloots.configuration.loot.LootHandler;
@@ -44,6 +43,7 @@ import org.bukkit.block.BlockState;
 import org.bukkit.block.Container;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
+import org.bukkit.inventory.ItemStack;
 import org.bukkit.util.RayTraceResult;
 
 import java.util.ArrayList;
@@ -162,7 +162,7 @@ public class LootCommand extends VhatLootsBaseCommand {
     @Subcommand("set")
     @CommandPermission("vhatloots.create")
     public class Set extends VhatLootsBaseCommand {
-        
+        // TODO: generify.
         @Subcommand("global")
         @Syntax("<lootName> <global>")
         @CommandCompletion("@loot-configurations @boolean")
@@ -229,29 +229,65 @@ public class LootCommand extends VhatLootsBaseCommand {
             xp.put(xpName, new XPLoot(xpName, probability, low, high));
             lootCollection.setXp(xp);
             lootHandler.update();
-            sender.sendMessage(formatMsg(localPlaceHolders, getMessage(sender, LanguageConfigurationNode.LOOT_XP_ADDED)));
+            sender.sendMessage(formatMsg(localPlaceHolders, getMessage(sender, LanguageConfigurationNode.LOOT_XP_CREATED)));
         }
         
-        @Subcommand("edit")
-        @Syntax("<collectionName> <xpName> <low> <high> <probability>")
-        @CommandCompletion("@loot-collections @loot-xp * * *")
-        public void onXPEdit(CommandSender sender, LootCollection lootCollection, XPLoot xp, int low, int high, @Optional double probability) {
-            if (low > high) {
-                int j = low;
-                low = high;
-                high = j;
-            }
+        @Subcommand("set")
+        @Syntax("<lootName> <moneyName> <option> <value>")
+        @CommandCompletion("@loot-collections @loot-xp @xp-options *")
+        public void onXPSet(CommandSender sender, LootCollection lootCollection, XPLoot xp, String option, String value) {
             HashMap<String, Object> localPlaceHolders = new HashMap<>();
             localPlaceHolders.put("collectionName", lootCollection.getName());
-            localPlaceHolders.put("xpName", xp.getName());
-            localPlaceHolders.put("probability", probability);
-            localPlaceHolders.put("range", low + " - " + high);
-            
-            xp.setProbability(probability);
-            xp.setLowerXP(low);
-            xp.setUpperXP(high);
+            localPlaceHolders.put("moneyName", xp.getName());
+            localPlaceHolders.put("option", option.toLowerCase());
+            switch (option.toLowerCase()) {
+                case "c":
+                case "p":
+                case "chance":
+                case "probability": {
+                    try {
+                        double probability = Double.valueOf(value);
+                        localPlaceHolders.put("value", probability);
+                        xp.setProbability(probability);
+                        break;
+                    } catch (NumberFormatException nfe) {
+                        sender.sendMessage(formatMsg(localPlaceHolders, getMessage(sender, LanguageConfigurationNode.LOOT_XP_INVALID_VALUE)));
+                        return;
+                    }
+                }
+                case "bottom":
+                case "l":
+                case "low": {
+                    try {
+                        int low = Integer.valueOf(value);
+                        localPlaceHolders.put("value", low);
+                        xp.setLowerBound(low);
+                        break;
+                    } catch (NumberFormatException nfe) {
+                        sender.sendMessage(formatMsg(localPlaceHolders, getMessage(sender, LanguageConfigurationNode.LOOT_XP_INVALID_VALUE)));
+                        return;
+                    }
+                }
+                case "top":
+                case "h":
+                case "high": {
+                    try {
+                        int high = Integer.valueOf(value);
+                        localPlaceHolders.put("value", high);
+                        xp.setUpperBound(high);
+                        break;
+                    } catch (NumberFormatException nfe) {
+                        sender.sendMessage(formatMsg(localPlaceHolders, getMessage(sender, LanguageConfigurationNode.LOOT_XP_INVALID_VALUE)));
+                        return;
+                    }
+                }
+                default: {
+                    sender.sendMessage(formatMsg(localPlaceHolders, getMessage(sender, LanguageConfigurationNode.LOOT_XP_INVALID_OPTION)));
+                    return;
+                }
+            }
             lootHandler.update();
-            sender.sendMessage(formatMsg(localPlaceHolders, getMessage(sender, LanguageConfigurationNode.LOOT_XP_EDITED)));
+            sender.sendMessage(formatMsg(localPlaceHolders, getMessage(sender, LanguageConfigurationNode.LOOT_XP_SET)));
         }
         
         @Subcommand("remove")
@@ -264,7 +300,7 @@ public class LootCommand extends VhatLootsBaseCommand {
             
             lootCollection.getXp().remove(xp.getName());
             lootHandler.update();
-            sender.sendMessage(formatMsg(localPlaceHolders, getMessage(sender, LanguageConfigurationNode.LOOT_XP_REMOVED)));
+            sender.sendMessage(formatMsg(localPlaceHolders, getMessage(sender, LanguageConfigurationNode.LOOT_XP_DELETED)));
         }
         
         @Subcommand("list")
@@ -295,7 +331,7 @@ public class LootCommand extends VhatLootsBaseCommand {
                 XPLoot val = vals.get(i);
                 localPlaceHolders.put("xpName", val.getName());
                 localPlaceHolders.put("probability", val.getProbability());
-                localPlaceHolders.put("range", val.getLowerXP() + " - " + val.getUpperXP());
+                localPlaceHolders.put("range", val.getLowerBound() + " - " + val.getUpperBound());
                 msg.add(formatMsg(localPlaceHolders, getMessage(sender, LanguageConfigurationNode.LOOT_XP_ELEMENT)));
             }
             msg.add(formatMsg(localPlaceHolders, getMessage(sender, LanguageConfigurationNode.LOOT_XP_FOOTER)));
@@ -331,28 +367,65 @@ public class LootCommand extends VhatLootsBaseCommand {
             money.put(moneyName, new MoneyLoot(moneyName, probability, low, high));
             lootCollection.setMoney(money);
             lootHandler.update();
-            sender.sendMessage(formatMsg(localPlaceHolders, getMessage(sender, LanguageConfigurationNode.LOOT_MONEY_ADDED)));
+            sender.sendMessage(formatMsg(localPlaceHolders, getMessage(sender, LanguageConfigurationNode.LOOT_MONEY_CREATED)));
         }
         
-        @Subcommand("edit")
-        @Syntax("<lootName> <moneyName> <low> <high> <probability>")
-        @CommandCompletion("@loot-collections @loot-money * * *")
-        public void onMoneyEdit(CommandSender sender, LootCollection lootCollection, MoneyLoot money, int low, int high, @Optional double probability) {
+        @Subcommand("set")
+        @Syntax("<lootName> <moneyName> <option> <value>")
+        @CommandCompletion("@loot-collections @loot-money @money-options *")
+        public void onMoneySet(CommandSender sender, LootCollection lootCollection, MoneyLoot money, String option, String value) {
             HashMap<String, Object> localPlaceHolders = new HashMap<>();
-            if (low > high) {
-                int j = low;
-                low = high;
-                high = j;
-            }
             localPlaceHolders.put("collectionName", lootCollection.getName());
             localPlaceHolders.put("moneyName", money.getName());
-            localPlaceHolders.put("probability", probability);
-            localPlaceHolders.put("range", low + " - " + high);
-            money.setProbability(probability);
-            money.setLowerMoney(low);
-            money.setUpperMoney(high);
+            localPlaceHolders.put("option", option.toLowerCase());
+            switch (option.toLowerCase()) {
+                case "c":
+                case "p":
+                case "chance":
+                case "probability": {
+                    try {
+                        double probability = Double.valueOf(value);
+                        localPlaceHolders.put("value", probability);
+                        money.setProbability(probability);
+                        break;
+                    } catch (NumberFormatException nfe) {
+                        sender.sendMessage(formatMsg(localPlaceHolders, getMessage(sender, LanguageConfigurationNode.LOOT_MONEY_INVALID_VALUE)));
+                        return;
+                    }
+                }
+                case "bottom":
+                case "l":
+                case "low": {
+                    try {
+                        int low = Integer.valueOf(value);
+                        localPlaceHolders.put("value", low);
+                        money.setLowerBound(low);
+                        break;
+                    } catch (NumberFormatException nfe) {
+                        sender.sendMessage(formatMsg(localPlaceHolders, getMessage(sender, LanguageConfigurationNode.LOOT_MONEY_INVALID_VALUE)));
+                        return;
+                    }
+                }
+                case "top":
+                case "h":
+                case "high": {
+                    try {
+                        int high = Integer.valueOf(value);
+                        localPlaceHolders.put("value", high);
+                        money.setUpperBound(high);
+                        break;
+                    } catch (NumberFormatException nfe) {
+                        sender.sendMessage(formatMsg(localPlaceHolders, getMessage(sender, LanguageConfigurationNode.LOOT_MONEY_INVALID_VALUE)));
+                        return;
+                    }
+                }
+                default: {
+                    sender.sendMessage(formatMsg(localPlaceHolders, getMessage(sender, LanguageConfigurationNode.LOOT_MONEY_INVALID_OPTION)));
+                    return;
+                }
+            }
             lootHandler.update();
-            sender.sendMessage(formatMsg(localPlaceHolders, getMessage(sender, LanguageConfigurationNode.LOOT_MONEY_EDITED)));
+            sender.sendMessage(formatMsg(localPlaceHolders, getMessage(sender, LanguageConfigurationNode.LOOT_MONEY_SET)));
         }
         
         @Subcommand("remove")
@@ -364,7 +437,7 @@ public class LootCommand extends VhatLootsBaseCommand {
             localPlaceHolders.put("moneyName", money.getName());
             lootCollection.getMoney().remove(money.getName());
             lootHandler.update();
-            sender.sendMessage(formatMsg(localPlaceHolders, getMessage(sender, LanguageConfigurationNode.LOOT_MONEY_REMOVED)));
+            sender.sendMessage(formatMsg(localPlaceHolders, getMessage(sender, LanguageConfigurationNode.LOOT_MONEY_DELETED)));
         }
         
         @Subcommand("list")
@@ -396,7 +469,7 @@ public class LootCommand extends VhatLootsBaseCommand {
                 MoneyLoot val = vals.get(i);
                 localPlaceHolders.put("moneyName", val.getName());
                 localPlaceHolders.put("probability", val.getProbability());
-                localPlaceHolders.put("range", val.getLowerMoney() + " - " + val.getUpperMoney());
+                localPlaceHolders.put("range", val.getLowerBound() + " - " + val.getUpperBound());
                 msg.add(formatMsg(localPlaceHolders, getMessage(sender, LanguageConfigurationNode.LOOT_MONEY_ELEMENT)));
             }
             msg.add(formatMsg(localPlaceHolders, getMessage(sender, LanguageConfigurationNode.LOOT_MONEY_FOOTER)));
@@ -422,10 +495,66 @@ public class LootCommand extends VhatLootsBaseCommand {
                 player.sendMessage(formatMsg(localPlaceHolders, getMessage(player, LanguageConfigurationNode.LOOT_ITEM_EXISTS)));
                 return;
             }
+            //TODO: Add validation for items.
             item.put(itemName, new ItemLoot(itemName, probability, player.getInventory().getItemInMainHand()));
             lootCollection.setItems(item);
             lootHandler.update();
-            player.sendMessage(formatMsg(localPlaceHolders, getMessage(player, LanguageConfigurationNode.LOOT_ITEM_ADDED)));
+            player.sendMessage(formatMsg(localPlaceHolders, getMessage(player, LanguageConfigurationNode.LOOT_ITEM_CREATED)));
+        }
+        
+        @Subcommand("set")
+        @Syntax("<lootName> <itemNameName> <option> <value>")
+        @CommandCompletion("@loot-collections @loot-items @item-options *")
+        public void onItemSet(CommandSender sender, LootCollection lootCollection, ItemLoot item, String option, String value) {
+            HashMap<String, Object> localPlaceHolders = new HashMap<>();
+            localPlaceHolders.put("collectionName", lootCollection.getName());
+            localPlaceHolders.put("itemName", item.getName());
+            localPlaceHolders.put("option", option.toLowerCase());
+            switch (option.toLowerCase()) {
+                case "c":
+                case "p":
+                case "chance":
+                case "probability": {
+                    try {
+                        double probability = Double.valueOf(value);
+                        localPlaceHolders.put("value", probability);
+                        item.setProbability(probability);
+                        break;
+                    } catch (NumberFormatException nfe) {
+                        sender.sendMessage(formatMsg(localPlaceHolders, getMessage(sender, LanguageConfigurationNode.LOOT_ITEM_INVALID_VALUE)));
+                        return;
+                    }
+                }
+                case "i":
+                case "itemstack": {
+                    if (sender instanceof Player) {
+                        ItemStack itemStack = ((Player) sender).getInventory().getItemInMainHand();
+                        item.setItemStack(itemStack);
+                        lootHandler.update();
+                        String msg = formatMsg(localPlaceHolders, getMessage(sender, LanguageConfigurationNode.LOOT_ITEM_SET));
+                        List<BaseComponent> components = new ArrayList<>();
+                        while (msg.contains("{value}")) {
+                            String before = msg.substring(0, msg.indexOf("{value}"));
+                            components.addAll(Arrays.asList(TextComponent.fromLegacyText(before)));
+                            components.add(MessageHelper.getClickableItem(formatMsg(localPlaceHolders,
+                                    getMessage(sender, LanguageConfigurationNode.LOOT_ITEM_ELEMENT_NAME)), itemStack));
+                            msg = msg.substring(msg.indexOf("{value}")).substring(7);
+                        }
+                        components.addAll(Arrays.asList(TextComponent.fromLegacyText(msg)));
+                        sender.spigot().sendMessage(components.toArray(new BaseComponent[0]));
+                        return;
+                    } else {
+                        sender.sendMessage(formatMsg(localPlaceHolders, getMessage(sender, LanguageConfigurationNode.ACF_O)));
+                        return;
+                    }
+                }
+                default: {
+                    sender.sendMessage(formatMsg(localPlaceHolders, getMessage(sender, LanguageConfigurationNode.LOOT_ITEM_INVALID_OPTION)));
+                    return;
+                }
+            }
+            lootHandler.update();
+            sender.sendMessage(formatMsg(localPlaceHolders, getMessage(sender, LanguageConfigurationNode.LOOT_ITEM_SET)));
         }
         
         @Subcommand("remove")
@@ -438,7 +567,7 @@ public class LootCommand extends VhatLootsBaseCommand {
             
             lootCollection.getItems().remove(item.getName());
             lootHandler.update();
-            sender.sendMessage(formatMsg(localPlaceHolders, getMessage(sender, LanguageConfigurationNode.LOOT_ITEM_REMOVED)));
+            sender.sendMessage(formatMsg(localPlaceHolders, getMessage(sender, LanguageConfigurationNode.LOOT_ITEM_DELETED)));
         }
         
         @Subcommand("list")
@@ -541,15 +670,159 @@ public class LootCommand extends VhatLootsBaseCommand {
                 }
             }
             lootHandler.update();
-            sender.sendMessage(formatMsg(localPlaceHolders, LootCommand.getMessage(sender, LanguageConfigurationNode.LOOT_COLLECTION_ADDED)));
-            
+            sender.sendMessage(formatMsg(localPlaceHolders, getMessage(sender, LanguageConfigurationNode.LOOT_COLLECTION_CREATED)));
         }
         
         @Subcommand("set")
-        @Syntax("<lootName> <collectionPath> <attribute> <value>")
-        @CommandCompletion("@loot-configurations @loot-collections * *")
-        public void onCollectionSet(CommandSender sender, LootConfiguration lootConfiguration, LootCollection collection, String attribute, String value) {
-            
+        @Syntax("<lootName> <collectionPath> <option> <value>")
+        @CommandCompletion("@loot-configurations @loot-collections @collection-options *")
+        public void onCollectionSet(CommandSender sender, LootConfiguration lootConfiguration, LootCollection lootCollection, String option, String value) {
+            HashMap<String, Object> localPlaceHolders = new HashMap<>();
+            localPlaceHolders.put("collectionName", lootCollection.getName());
+            localPlaceHolders.put("lootName", lootConfiguration.getName());
+            localPlaceHolders.put("option", option.toLowerCase());
+            switch (option.toLowerCase()) {
+                case "c":
+                case "p":
+                case "chance":
+                case "probability": {
+                    try {
+                        double probability = Double.valueOf(value);
+                        localPlaceHolders.put("value", probability);
+                        lootCollection.setProbability(probability);
+                        break;
+                    } catch (NumberFormatException nfe) {
+                        sender.sendMessage(formatMsg(localPlaceHolders, getMessage(sender, LanguageConfigurationNode.LOOT_COLLECTION_INVALID_VALUE)));
+                        return;
+                    }
+                }
+                case "minRollXP":
+                case "minRollAmountXP": {
+                    try {
+                        int minRollAmountXP = Integer.valueOf(value);
+                        localPlaceHolders.put("value", minRollAmountXP);
+                        lootCollection.setMinRollAmountXP(minRollAmountXP);
+                        break;
+                    } catch (NumberFormatException nfe) {
+                        sender.sendMessage(formatMsg(localPlaceHolders, getMessage(sender, LanguageConfigurationNode.LOOT_COLLECTION_INVALID_VALUE)));
+                        return;
+                    }
+                }
+                case "maxRollXP":
+                case "maxRollAmountXP": {
+                    try {
+                        int maxRollAmountXP = Integer.valueOf(value);
+                        localPlaceHolders.put("value", maxRollAmountXP);
+                        lootCollection.setMaxRollAmountXP(maxRollAmountXP);
+                        break;
+                    } catch (NumberFormatException nfe) {
+                        sender.sendMessage(formatMsg(localPlaceHolders, getMessage(sender, LanguageConfigurationNode.LOOT_COLLECTION_INVALID_VALUE)));
+                        return;
+                    }
+                }
+                case "minRollMoney":
+                case "minRollAmountMoney": {
+                    try {
+                        int minRollAmountMoney = Integer.valueOf(value);
+                        localPlaceHolders.put("value", minRollAmountMoney);
+                        lootCollection.setMinRollAmountMoney(minRollAmountMoney);
+                        break;
+                    } catch (NumberFormatException nfe) {
+                        sender.sendMessage(formatMsg(localPlaceHolders, getMessage(sender, LanguageConfigurationNode.LOOT_COLLECTION_INVALID_VALUE)));
+                        return;
+                    }
+                }
+                case "maxRollMoney":
+                case "maxRollAmountMoney": {
+                    try {
+                        int maxRollAmountMoney = Integer.valueOf(value);
+                        localPlaceHolders.put("value", maxRollAmountMoney);
+                        lootCollection.setMaxRollAmountMoney(maxRollAmountMoney);
+                        break;
+                    } catch (NumberFormatException nfe) {
+                        sender.sendMessage(formatMsg(localPlaceHolders, getMessage(sender, LanguageConfigurationNode.LOOT_COLLECTION_INVALID_VALUE)));
+                        return;
+                    }
+                }
+                case "minRollItems":
+                case "minRollAmountItems": {
+                    try {
+                        int minRollAmountItems = Integer.valueOf(value);
+                        localPlaceHolders.put("value", minRollAmountItems);
+                        lootCollection.setMinRollAmountItems(minRollAmountItems);
+                        break;
+                    } catch (NumberFormatException nfe) {
+                        sender.sendMessage(formatMsg(localPlaceHolders, getMessage(sender, LanguageConfigurationNode.LOOT_COLLECTION_INVALID_VALUE)));
+                        return;
+                    }
+                }
+                case "maxRollItems":
+                case "maxRollAmountItems": {
+                    try {
+                        int maxRollAmountItems = Integer.valueOf(value);
+                        localPlaceHolders.put("value", maxRollAmountItems);
+                        lootCollection.setMaxRollAmountItems(maxRollAmountItems);
+                        break;
+                    } catch (NumberFormatException nfe) {
+                        sender.sendMessage(formatMsg(localPlaceHolders, getMessage(sender, LanguageConfigurationNode.LOOT_COLLECTION_INVALID_VALUE)));
+                        return;
+                    }
+                }
+                case "minRollCommands":
+                case "minRollAmountCommands": {
+                    try {
+                        int minRollAmountCommands = Integer.valueOf(value);
+                        localPlaceHolders.put("value", minRollAmountCommands);
+                        lootCollection.setMinRollAmountCommands(minRollAmountCommands);
+                        break;
+                    } catch (NumberFormatException nfe) {
+                        sender.sendMessage(formatMsg(localPlaceHolders, getMessage(sender, LanguageConfigurationNode.LOOT_COLLECTION_INVALID_VALUE)));
+                        return;
+                    }
+                }
+                case "maxRollCommands":
+                case "maxRollAmountCommands": {
+                    try {
+                        int maxRollAmountCommands = Integer.valueOf(value);
+                        localPlaceHolders.put("value", maxRollAmountCommands);
+                        lootCollection.setMaxRollAmountCommands(maxRollAmountCommands);
+                        break;
+                    } catch (NumberFormatException nfe) {
+                        sender.sendMessage(formatMsg(localPlaceHolders, getMessage(sender, LanguageConfigurationNode.LOOT_COLLECTION_INVALID_VALUE)));
+                        return;
+                    }
+                }
+                case "minRollCollections":
+                case "minRollAmountCollections": {
+                    try {
+                        int minRollAmountCollections = Integer.valueOf(value);
+                        localPlaceHolders.put("value", minRollAmountCollections);
+                        lootCollection.setMinRollAmountCollections(minRollAmountCollections);
+                        break;
+                    } catch (NumberFormatException nfe) {
+                        sender.sendMessage(formatMsg(localPlaceHolders, getMessage(sender, LanguageConfigurationNode.LOOT_COLLECTION_INVALID_VALUE)));
+                        return;
+                    }
+                }
+                case "maxRollCollections":
+                case "maxRollAmountCollections": {
+                    try {
+                        int maxRollAmountCollections = Integer.valueOf(value);
+                        localPlaceHolders.put("value", maxRollAmountCollections);
+                        lootCollection.setMaxRollAmountCollections(maxRollAmountCollections);
+                        break;
+                    } catch (NumberFormatException nfe) {
+                        sender.sendMessage(formatMsg(localPlaceHolders, getMessage(sender, LanguageConfigurationNode.LOOT_COLLECTION_INVALID_VALUE)));
+                        return;
+                    }
+                }
+                default: {
+                    sender.sendMessage(formatMsg(localPlaceHolders, getMessage(sender, LanguageConfigurationNode.LOOT_COLLECTION_INVALID_OPTION)));
+                    return;
+                }
+            }
+            lootHandler.update();
+            sender.sendMessage(formatMsg(localPlaceHolders, getMessage(sender, LanguageConfigurationNode.LOOT_COLLECTION_SET)));
         }
         
         public void onCollectionRemove(CommandSender sender, LootConfiguration lootConfiguration, LootCollection collection) {

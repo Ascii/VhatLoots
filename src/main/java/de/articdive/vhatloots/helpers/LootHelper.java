@@ -33,15 +33,13 @@ public class LootHelper {
             player.giveExp(lootBundle.getExp());
             // TODO: Send message.
         }
-        if (lootBundle.getCommands().size() > 0) {
-            for (String command : lootBundle.getCommands()) {
-                if (command.startsWith("console:")) {
-                    Bukkit.getServer().dispatchCommand(Bukkit.getConsoleSender(), command);
-                } else {
-                    player.performCommand(command);
-                }
-                // TODO: Send message.
+        for (String command : lootBundle.getCommandList()) {
+            if (command.startsWith("console:")) {
+                Bukkit.getServer().dispatchCommand(Bukkit.getConsoleSender(), command);
+            } else {
+                player.performCommand(command);
             }
+            // TODO: Send message.
         }
         if (lootConfiguration.isAutoLoot()) {
             // TODO: Put directly into his inventory

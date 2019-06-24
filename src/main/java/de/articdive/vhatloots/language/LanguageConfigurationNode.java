@@ -72,25 +72,7 @@ public enum LanguageConfigurationNode implements ConfigurationNode {
     
     PLUGIN_ENABLED("plugin_enabled", "VhatLoots has been enabled."),
     PLUGIN_DISABLED("plugin_disabled", "VhatLoots has been disabled."),
-    PLUGIN_LICENSES("plugin_licenses",
-            "&a(MIT License) &bDelegatingMap, Table, ACF, locales and MinecraftTimings &2(Aikar)" +
-                    "&a(GNU Lesser General Public License v3.0) &bNightConfig &2(TheElectronWill)" +
-                    "&a(The Apache Software License, Version 2.0) &bJackson (with databind) &2(Jackson project community)" +
-                    "&a(The Apache Software License, Version 2.0) &bGson and Guava &2(Google)" +
-                    "&a(MPL 2.0 or EPL 1.0) &bH2 Database Engine &2(H2 project community)" +
-                    "&a(MIT License) &bMicrosoft JDBC Driver for SQL Server &2(Microsoft)" +
-                    "&a(Apache License, Version 2.0) Typesafe-config &2(Lightbend)" +
-                    "&a(The Apache Software License, Version 2.0) &bJavaLite - ActiveJDBC ORM Framework &2(ipolevoy)" +
-                    "&a(The Apache Software License, Version 2.0) &bCommons Lang &2(Apache Software Foundation)" +
-                    "&a(MIT License) &bClassGraph &2(lukehutch)" +
-                    "&a(The Apache Software License, Version 2.0) &bJoda-Time &2(Jodatime project community)" +
-                    "&a(Apache License, Version 2.0) &bExpiringMap &2(jhalterman)" +
-                    "&a(Apache License, Version 2.0) &bApache Log4j API (Apache Software Foundation)" +
-                    "&a(Apache License, Version 2.0) &bApache Log4j SLF4J Binding (Apache Software Foundation)" +
-                    "&a(The Apache Software License, Version 2.0) &bIntelliJ IDEA Annotations &2(Jetbrains)" +
-                    "&a(Apache License, Version 2.0) &bLiquibase &2(Datical)" +
-                    "&a(BSD-2-Clause) &bPostgreSQL JDBC Driver &2(PostgreSQL project community)" +
-                    "&a(MIT License) &bSLF4J API Module &2(SLF4J project community)"),
+    
     TIME("time", new ConfigurationSection()),
     TIME_YEARS("time.years", "&3Years&c, "),
     TIME_MONTHS("time.months", "&3Months&c, "),
@@ -106,7 +88,7 @@ public enum LanguageConfigurationNode implements ConfigurationNode {
     LOOT_INVALID_BLOCK("loot.invalid_block", "&cYou are not looking at a valid Container."),
     LOOT_RENAMED("loot.renamed", "&aLoot layout &2{oldLootName} &awas renamed to &2{newLootName}&a."),
     LOOT_FAILED_LINK("loot.failed_link", "&cLoot-configuration failed to link to target Block."),
-    LOOT_DELETED("loot.deleted", "&aLoot layout &2{lootName} &asuccessfully deleted."),
+    LOOT_DELETED("loot.deleted", "&aLoot layout &2{lootName} &awas successfully deleted."),
     LOOT_HEADER("loot.list_header", " &9--- &7[&aLoot-Configurations&7] &9--- "),
     LOOT_ELEMENT("loot.list_element", "&a{lootName} &e- &3AL: {autoLoot} &e- &3G: {global}"),
     LOOT_FOOTER("loot.list_footer", "&9Page: &2{page}&7/&2{maxPage}"),
@@ -117,35 +99,50 @@ public enum LanguageConfigurationNode implements ConfigurationNode {
     LOOT_SET_DELAY("loot_set.delay", "&aThe delay of &2{lootname} &a,was set to &3{delay}."),
     
     LOOT_XP("loot_xp", new ConfigurationSection()),
-    LOOT_XP_EDITED("loot_xp.edited", "&aEdited &2{xpName} &ain &2{collectionName} to have a range of &9{range}&a."),
+    LOOT_XP_CREATED("loot_xp.created", "&a&aSuccessfully created xp layout &2{xpName} &ain &2{collectionName}&a."),
     LOOT_XP_EXISTS("loot_xp.exists", "&cXP layout called &4{xpName}&c already exists in &4{collectionName}."),
-    LOOT_XP_ADDED("loot_xp.added", "&aAdded &2{xpName} &ato &2{collectionName}&a."),
-    LOOT_XP_REMOVED("loot_xp.removed", "&aXP layout &2{xpName} &ain &2{collectionName} &asuccessfully deleted."),
+    LOOT_XP_DELETED("loot_xp.deleted", "&aXP layout &2{xpName} &ain &2{collectionName} &awas successfully deleted."),
+    LOOT_XP_SET("loot_xp.set", "&aSet option: &2{option} &ato be &2{value} &ain &2{xpName} &ain &2{collectionName}&a."),
+    LOOT_XP_INVALID_OPTION("loot_xp.invalid_option", "&cOption &4{option} &cis not a valid option for xp layout &4{xpName} &cin &4{collectionName}&c."),
+    LOOT_XP_INVALID_VALUE("loot_xp.invalid_value", "&cValue &4[value} &cwas not in the valid format for option &4{option}&c."),
+    
     LOOT_XP_HEADER("loot_xp.list_header", " &9--- &7[&aXP-Configurations&7] &9--- "),
     LOOT_XP_ELEMENT("loot_xp.list_element", "&a{xpName} &e- &3{probability}% &e- &3{range}"),
     LOOT_XP_FOOTER("loot_xp.list_footer", "&9Page: &2{page}&7/&2{maxPage}"),
     
     LOOT_MONEY("loot_money", new ConfigurationSection()),
-    LOOT_MONEY_EDITED("loot_money.edited", "&aEdited &2{moneyName} &ain &2{collectionName} to have a range of &9{range}&a."),
+    LOOT_MONEY_CREATED("loot_money.created", "&aSuccessfully created money layout &2{moneyName} &ain &2{collectionName}&a."),
     LOOT_MONEY_EXISTS("loot_money.exists", "&cMoney layout called &4{moneyName}&c already exists in &4{collectionName}."),
-    LOOT_MONEY_ADDED("loot_money.added", "&aAdded &2{moneyName} &ato &2{collectionName}&a."),
-    LOOT_MONEY_REMOVED("loot_money.removed", "&aMoney layout &2{moneyName} &ain &2{collectionName} &asuccessfully deleted."),
+    LOOT_MONEY_DELETED("loot_money.deleted", "&aMoney layout &2{moneyName} &ain &2{collectionName} &awas successfully deleted."),
+    LOOT_MONEY_SET("loot_money.set", "&aSet option: &2{option} &ato be &2{value} &ain &2{moneyName} &ain &2{collectionName}&a."),
+    LOOT_MONEY_INVALID_OPTION("loot_money.invalid_option", "&cOption &4{option} &cis not a valid option for money layout &4{moneyName} &cin &4{collectionName}&c."),
+    LOOT_MONEY_INVALID_VALUE("loot_money.invalid_value", "&cValue &4[value} &cwas not in the valid format for option &4{option}&c."),
+    
     LOOT_MONEY_HEADER("loot_money.list_header", " &9--- &7[&aMoney-Configurations&7] &9--- "),
     LOOT_MONEY_ELEMENT("loot_money.list_element", "&a{moneyName} &e - &3{probability}% &e - &3{range}"),
     LOOT_MONEY_FOOTER("loot_money.list_footer", "&9Page: &2{page}&7/&2{maxPage}"),
     
     LOOT_ITEM("loot_item", new ConfigurationSection()),
+    LOOT_ITEM_CREATED("loot_item.created", "&aSuccessfully created item layout &2{itemName} &ain &2{collectionName}&a."),
     LOOT_ITEM_EXISTS("loot_item.exists", "&cItem layout called &4{itemName}&c already exists in collection &4{collectionName}."),
-    LOOT_ITEM_ADDED("loot_item.added", "&aAdded &2{itemName} &ato &2{collectionName}&a."),
-    LOOT_ITEM_REMOVED("loot_item.removed", "&aItem layout &2{itemName} &ain &2{collectionName} &asuccessfully deleted."),
+    LOOT_ITEM_DELETED("loot_item.deleted", "&aItem layout &2{itemName} &ain &2{collectionName} &awas successfully deleted."),
+    LOOT_ITEM_SET("loot_item.set", "&aSet option: &2{option} &ato be &2{value} &ain &2{moneyName} &ain &2{collectionName}&a."),
+    LOOT_ITEM_INVALID_OPTION("loot_item.invalid_option", "&cOption &4{option} &cis not a valid option for item layout &4{itemName} &cin &4{collectionName}&c."),
+    LOOT_ITEM_INVALID_VALUE("loot_item.invalid_value", "&cValue &4[value} &cwas not in the valid format for option &4{option}&c."),
+    
     LOOT_ITEM_HEADER("loot_item.list_header", " &9--- &7[&aItem-Configurations&7] &9--- "),
+    
     LOOT_ITEM_ELEMENT("loot_item.list_element", "&a{itemName} &e - &f{probability}% &e - &9{item}."),
     LOOT_ITEM_ELEMENT_NAME("loot_item.list_element_name", "&f[Item]"),
     LOOT_ITEM_FOOTER("loot_item.list_footer", "&9Page: &2{page}&7/&2{maxPage}"),
     
     LOOT_COLLECTION("loot_collection", new ConfigurationSection()),
+    LOOT_COLLECTION_CREATED("loot_collection_added", "&aAdded &2{collectionName} &ato &2{lootName}&a."),
     LOOT_COLLECTION_EXISTS("loot_collection.exists", "&cCollection called &4{collectionName}&c already exists in loot &4{lootName}&c."),
-    LOOT_COLLECTION_ADDED("loot_collection_added", "&aAdded &2{collectionName} &ato &2{lootName}&a."),
+    LOOT_COLLECTION_DELETED("loot_collection.deleted", "&aCollection &2{collectionName} &ain &2{lootName} &awas successfully deleted."),
+    LOOT_COLLECTION_SET("loot_collection.set", "&aSet option: &2{option} &ato be &2{value} &ain &2{collectionName} &ain &2{lootName}&a."),
+    LOOT_COLLECTION_INVALID_OPTION("loot_collection.invalid_option", "&cOption &4{option} &cis not a valid option for item layout &4{collectionName} &cin &4{lootName}&c."),
+    LOOT_COLLECTION_INVALID_VALUE("loot_collection.invalid_value", "&cValue &4[value} &cwas not in the valid format for option &4{option}&c."),
     LOOT_COLLECTION_PARENT_DOESNT_EXIST("loot_collection.parent_doesnt_exist", "&cParent-collection called &4{parentCollectionName}&c does not exist in loot &4{lootName}&c."),
     
     LOOTBOX("loot_container", new ConfigurationSection()),

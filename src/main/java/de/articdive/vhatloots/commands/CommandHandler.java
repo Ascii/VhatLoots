@@ -197,6 +197,34 @@ public class CommandHandler {
                     }
                     return collection.getCommands().get(arg);
                 });
+        
+        manager.getCommandCompletions().registerStaticCompletion("xp-options", Arrays.asList(
+                "high",
+                "low",
+                "probability")
+        );
+        manager.getCommandCompletions().registerStaticCompletion("money-options", Arrays.asList(
+                "high",
+                "low",
+                "probability")
+        );
+        manager.getCommandCompletions().registerStaticCompletion("item-options", Arrays.asList(
+                "itemStack",
+                "probability"
+        ));
+        manager.getCommandCompletions().registerStaticCompletion("command-options", Arrays.asList(
+                "command",
+                "console",
+                "probability"
+        ));
+        manager.getCommandCompletions().registerStaticCompletion("collection-options", Arrays.asList(
+                "minRollAmountXP", "maxRollAmountXP",
+                "minRollAmountMoney", "maxRollAmountMoney",
+                "minRollAmountCommands", "maxRollAmountCommands",
+                "minRollAmountItems", "maxRollAmountItems",
+                "minRollAmountCollections", "maxRollAmountCollections",
+                "probability")
+        );
         manager.registerCommand(new VhatLootsCommand());
         manager.registerCommand(new LootCommand());
     }

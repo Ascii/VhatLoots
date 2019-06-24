@@ -28,7 +28,7 @@ import java.util.List;
  */
 public class LootBundle {
     private List<ItemStack> itemList = new ArrayList<>();
-    private List<String> commands = new ArrayList<>();
+    private List<String> commandList = new ArrayList<>();
     private double money = 0.0;
     private int exp = 0;
     
@@ -82,10 +82,14 @@ public class LootBundle {
         if (command.startsWith("/")) {
             command = command.substring(1);
         }
-        commands.add(command);
+        commandList.add(command);
     }
     
-    public List<String> getCommands() {
-        return commands;
+    public List<String> getCommandList() {
+        return commandList;
+    }
+    
+    public void setCommandList(List<String> commandList) {
+        this.commandList = commandList;
     }
 }

@@ -25,36 +25,35 @@ import de.articdive.vhatloots.helpers.RandomHelper;
  * @author Lukas Mansour
  */
 public class MoneyLoot extends LootObject {
-    private int lowerMoney;
-    private int upperMoney;
+    private int lowerBound;
+    private int upperBound;
     
     public MoneyLoot(String name, double probability, int lowerMoney, int upperMoney) {
         super(name, probability);
-        this.lowerMoney = lowerMoney;
-        this.upperMoney = upperMoney;
+        this.lowerBound = lowerMoney;
+        this.upperBound = upperMoney;
     }
     
-    public int getLowerMoney() {
-        return lowerMoney;
+    public int getLowerBound() {
+        return lowerBound;
     }
     
-    public void setLowerMoney(int lowerMoney) {
-        this.lowerMoney = lowerMoney;
+    public void setLowerBound(int lowerBound) {
+        this.lowerBound = lowerBound;
     }
     
-    public int getUpperMoney() {
-        return upperMoney;
+    public int getUpperBound() {
+        return upperBound;
     }
     
-    public void setUpperMoney(int upperMoney) {
-        this.upperMoney = upperMoney;
+    public void setUpperBound(int upperBound) {
+        this.upperBound = upperBound;
     }
     
     @Override
     public void generateLoot(LootBundle bundle, double lootingBonus) {
         if (rollDice(lootingBonus)) {
-            bundle.addMoney(RandomHelper.rollForDouble(lowerMoney, upperMoney));
+            bundle.addMoney(RandomHelper.rollForDouble(lowerBound, upperBound));
         }
-        
     }
 }

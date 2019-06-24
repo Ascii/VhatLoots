@@ -61,22 +61,23 @@ public class VhatLootsCommand extends VhatLootsBaseCommand {
     public void onLibraries(CommandSender sender) {
         sender.sendMessage(formatMsg(new HashMap<>(),
                 "&a(MIT License) &bDelegatingMap, Table, ACF, locales and MinecraftTimings &2(Aikar)",
-                "&a(GNU Lesser General Public License v3.0) &bNightConfig &2(TheElectronWill)",
-                "&a(The Apache Software License, Version 2.0) &bJackson (with databind) &2(Jackson project community)",
-                "&a(The Apache Software License, Version 2.0) &bGson and Guava &2(Google)",
-                "&a(MPL 2.0 or EPL 1.0) &bH2 Database Engine &2(H2 project community)",
-                "&a(MIT License) &bMicrosoft JDBC Driver for SQL Server &2(Microsoft)",
-                "&a(Apache License, Version 2.0) Typesafe-config &2(Lightbend)",
-                "&a(The Apache Software License, Version 2.0) &bJavaLite - ActiveJDBC ORM Framework &2(ipolevoy)",
-                "&a(The Apache Software License, Version 2.0) &bCommons Lang &2(Apache Software Foundation)",
+                "&a(MIT License) &bSLF4J API Module &2(SLF4J project community)",
                 "&a(MIT License) &bClassGraph &2(lukehutch)",
-                "&a(The Apache Software License, Version 2.0) &bJoda-Time &2(Jodatime project community)",
+                "&a(MIT License) &bMicrosoft JDBC Driver for SQL Server &2(Microsoft)",
+                "&a(LGPL v3.0) &bNightConfig &2(TheElectronWill)",
+                "&a(Apache License, Version 2.0) &bJackson (with databind) &2(Jackson project community)",
+                "&a(Apache License, Version 2.0) Typesafe-config &2(Lightbend)",
+                "&a(Apache License, Version 2.0) &bJavaLite - ActiveJDBC ORM Framework &2(ipolevoy)",
+                "&a(Apache License, Version 2.0) &bCommons Lang &2(Apache Software Foundation)",
+                "&a(Apache License, Version 2.0) &bJoda-Time &2(Jodatime project community)",
+                "&a(Apache License, Version 2.0) &bLiquibase &2(Datical)",
                 "&a(Apache License, Version 2.0) &bExpiringMap &2(jhalterman)",
                 "&a(Apache License, Version 2.0) &bApache Log4j API &2(Apache Software Foundation)",
                 "&a(Apache License, Version 2.0) &bApache Log4j SLF4J Binding &2(Apache Software Foundation)",
-                "&a(The Apache Software License, Version 2.0) &bIntelliJ IDEA Annotations &2(Jetbrains)",
-                "&a(Apache License, Version 2.0) &bLiquibase &2(Datical)",
-                "&a(BSD-2-Clause) &bPostgreSQL JDBC Driver &2(PostgreSQL project community)",
-                "&a(MIT License) &bSLF4J API Module &2(SLF4J project community)"));
+                "&a(Apache License, Version 2.0) &bIntelliJ IDEA Annotations &2(Jetbrains)",
+                "&a(Apache License, Version 2.0) &bGson and Guava &2(Google)",
+                "&a(MPL 2.0 or EPL 1.0) &bH2 Database Engine &2(H2 project community)",
+                "&a(BSD-2-Clause) &bPostgreSQL JDBC Driver &2(PostgreSQL project community)"
+        ));
     }
 }

@@ -25,35 +25,35 @@ import de.articdive.vhatloots.helpers.RandomHelper;
  * @author Lukas Mansour
  */
 public class XPLoot extends LootObject {
-    private int lowerXP;
-    private int upperXP;
+    private int lowerBound;
+    private int upperBound;
     
     public XPLoot(String name, double probability, int lowerXP, int upperXP) {
         super(name, probability);
-        this.lowerXP = lowerXP;
-        this.upperXP = upperXP;
+        this.lowerBound = lowerXP;
+        this.upperBound = upperXP;
     }
     
-    public int getLowerXP() {
-        return lowerXP;
+    public int getLowerBound() {
+        return lowerBound;
     }
     
-    public void setLowerXP(int lowerXP) {
-        this.lowerXP = lowerXP;
+    public void setLowerBound(int lowerXP) {
+        this.lowerBound = lowerXP;
     }
     
-    public int getUpperXP() {
-        return upperXP;
+    public int getUpperBound() {
+        return upperBound;
     }
     
-    public void setUpperXP(int upperXP) {
-        this.upperXP = upperXP;
+    public void setUpperBound(int upperXP) {
+        this.upperBound = upperXP;
     }
     
     @Override
     public void generateLoot(LootBundle bundle, double lootingBonus) {
         if (rollDice(lootingBonus)) {
-            bundle.addExp(RandomHelper.rollForInt(lowerXP, upperXP));
+            bundle.addExp(RandomHelper.rollForInt(lowerBound, upperBound));
         }
     }
 }
