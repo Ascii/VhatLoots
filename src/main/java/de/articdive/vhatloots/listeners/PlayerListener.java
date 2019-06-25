@@ -21,7 +21,7 @@ package de.articdive.vhatloots.listeners;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import de.articdive.vhatloots.configuration.loot.LootHandler;
-import de.articdive.vhatloots.configuration.loot.objects.LootConfiguration;
+import de.articdive.vhatloots.configuration.loot.LootConfiguration;
 import de.articdive.vhatloots.events.PlayerLootEvent;
 import de.articdive.vhatloots.events.PrePlayerLootEvent;
 import de.articdive.vhatloots.events.abstractions.PreLootEvent;

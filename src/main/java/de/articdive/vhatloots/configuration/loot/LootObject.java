@@ -16,7 +16,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package de.articdive.vhatloots.configuration.loot.objects;
+package de.articdive.vhatloots.configuration.loot;
 
 import de.articdive.vhatloots.events.objects.LootBundle;
 import de.articdive.vhatloots.helpers.RandomHelper;
@@ -25,8 +25,10 @@ import de.articdive.vhatloots.helpers.RandomHelper;
  * @author Lukas Mansour
  */
 public abstract class LootObject {
-    private double probability;
+    private transient LootConfiguration root;
+    private transient LootCollection parent;
     private transient String name;
+    private double probability;
     
     LootObject(String name, double probability) {
         this.name = name;
@@ -43,7 +45,7 @@ public abstract class LootObject {
         return name;
     }
     
-    public void setName(String name) {
+    void setName(String name) {
         this.name = name;
     }
     
@@ -53,5 +55,21 @@ public abstract class LootObject {
     
     public void setProbability(double probability) {
         this.probability = probability;
+    }
+    
+    public LootConfiguration getRoot() {
+        return root;
+    }
+    
+    void setRoot(LootConfiguration root) {
+        this.root = root;
+    }
+    
+    public LootCollection getParent() {
+        return parent;
+    }
+    
+    void setParent(LootCollection parent) {
+        this.parent = parent;
     }
 }

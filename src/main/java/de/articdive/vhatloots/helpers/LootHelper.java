@@ -18,7 +18,7 @@
 
 package de.articdive.vhatloots.helpers;
 
-import de.articdive.vhatloots.configuration.loot.objects.LootConfiguration;
+import de.articdive.vhatloots.configuration.loot.LootConfiguration;
 import de.articdive.vhatloots.events.objects.LootBundle;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;

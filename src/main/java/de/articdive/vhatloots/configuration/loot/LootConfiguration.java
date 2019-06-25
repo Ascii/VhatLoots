@@ -12,11 +12,11 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
- * You should have received a copyFile of the GNU General Public License
+ * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package de.articdive.vhatloots.configuration.loot.objects;
+package de.articdive.vhatloots.configuration.loot;
 
 import de.articdive.vhatloots.events.objects.LootBundle;
 import de.articdive.vhatloots.helpers.RandomHelper;
@@ -28,21 +28,20 @@ import java.util.List;
 /**
  * @author Lukas Mansour
  */
-public class LootConfiguration {
+public class LootConfiguration extends LootCollection {
     private String name;
     private boolean autoLoot;
     private boolean global;
     private int delay;
-    private LootCollection loot;
     
     private transient HashMap<String, LootCollection> lootPaths;
     
-    public LootConfiguration(String name) {
+    public LootConfiguration(String name, double probability) {
+        super(name, probability);
         this.name = name;
         this.autoLoot = false;
         this.global = false;
         this.delay = 4096;
-        this.loot = new LootCollection(name, 100);
     }
     
     public String getName() {
@@ -97,61 +96,60 @@ public class LootConfiguration {
     
     public LootBundle generateLoot(double lootingBonus) {
         LootBundle lootBundle = new LootBundle();
-        LootCollection loot = this.loot;
         boolean collectiveXP = false,
                 collectiveMoney = false,
                 collectiveItems = false,
                 collectiveCommands = false,
                 collectiveCollections = false;
-        if (loot.getMaxRollAmountXP() <= 0) {
-            for (XPLoot xp : loot.getXp().values()) {
+        if (maxRollAmountXP <= 0) {
+            for (XPLoot xp : xp.values()) {
                 xp.generateLoot(lootBundle, lootingBonus);
             }
         } else {
             collectiveXP = true;
         }
-        if (loot.getMaxRollAmountMoney() <= 0) {
-            for (MoneyLoot money : loot.getMoney().values()) {
+        if (maxRollAmountMoney <= 0) {
+            for (MoneyLoot money : money.values()) {
                 money.generateLoot(lootBundle, lootingBonus);
             }
         } else {
             collectiveMoney = true;
         }
-        if (loot.getMaxRollAmountItems() <= 0) {
-            for (ItemLoot item : loot.getItems().values()) {
+        if (maxRollAmountItems <= 0) {
+            for (ItemLoot item : items.values()) {
                 item.generateLoot(lootBundle, lootingBonus);
             }
         } else {
             collectiveItems = true;
         }
-        if (loot.getMaxRollAmountCommands() <= 0) {
-            for (CommandLoot command : loot.getCommands().values()) {
+        if (maxRollAmountCommands <= 0) {
+            for (CommandLoot command : commands.values()) {
                 command.generateLoot(lootBundle, lootingBonus);
             }
         } else {
             collectiveCommands = true;
         }
-        if (loot.getMaxRollAmountCollections() <= 0) {
-            for (LootCollection collection : loot.getCollections().values()) {
+        if (maxRollAmountCollections <= 0) {
+            for (LootCollection collection : collections.values()) {
                 collection.generateLoot(lootBundle, lootingBonus);
             }
         } else {
             collectiveCollections = true;
         }
         if (collectiveXP) {
-            generateLootObject(new ArrayList<>(loot.getXp().values()), loot.getMinRollAmountXP(), loot.getMaxRollAmountXP(), lootBundle, lootingBonus);
+            generateLootObject(new ArrayList<>(xp.values()), minRollAmountXP, maxRollAmountXP, lootBundle, lootingBonus);
         }
         if (collectiveMoney) {
-            generateLootObject(new ArrayList<>(loot.getMoney().values()), loot.getMinRollAmountMoney(), loot.getMaxRollAmountItems(), lootBundle, lootingBonus);
+            generateLootObject(new ArrayList<>(money.values()), minRollAmountMoney, maxRollAmountItems, lootBundle, lootingBonus);
         }
         if (collectiveItems) {
-            generateLootObject(new ArrayList<>(loot.getItems().values()), loot.getMinRollAmountItems(), loot.getMaxRollAmountItems(), lootBundle, lootingBonus);
+            generateLootObject(new ArrayList<>(items.values()), minRollAmountItems, maxRollAmountItems, lootBundle, lootingBonus);
         }
         if (collectiveCommands) {
-            generateLootObject(new ArrayList<>(loot.getCommands().values()), loot.getMinRollAmountCommands(), loot.getMaxRollAmountCommands(), lootBundle, lootingBonus);
+            generateLootObject(new ArrayList<>(commands.values()), minRollAmountCommands, maxRollAmountCommands, lootBundle, lootingBonus);
         }
         if (collectiveCollections) {
-            generateLootObject(new ArrayList<>(loot.getCollections().values()), loot.getMinRollAmountCollections(), loot.getMaxRollAmountCollections(), lootBundle, lootingBonus);
+            generateLootObject(new ArrayList<>(collections.values()), minRollAmountCollections, maxRollAmountCollections, lootBundle, lootingBonus);
         }
         return lootBundle;
     }
@@ -181,13 +179,5 @@ public class LootConfiguration {
                 numberLooted++;
             }
         }
-    }
-    
-    public LootCollection getLoot() {
-        return loot;
-    }
-    
-    public void setLoot(LootCollection loot) {
-        this.loot = loot;
     }
 }

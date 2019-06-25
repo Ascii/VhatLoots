@@ -12,11 +12,11 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
- * You should have received a copyFile of the GNU General Public License
+ * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package de.articdive.vhatloots.configuration.loot.objects;
+package de.articdive.vhatloots.configuration.loot;
 
 import de.articdive.vhatloots.events.objects.LootBundle;
 import de.articdive.vhatloots.helpers.RandomHelper;
@@ -29,22 +29,22 @@ import java.util.List;
  * @author Lukas Mansour
  */
 public class LootCollection extends LootObject {
+    int minRollAmountXP;
+    int maxRollAmountXP;
+    int minRollAmountMoney;
+    int maxRollAmountMoney;
+    int minRollAmountItems;
+    int maxRollAmountItems;
+    int minRollAmountCommands;
+    int maxRollAmountCommands;
+    int minRollAmountCollections;
+    int maxRollAmountCollections;
+    LinkedHashMap<String, XPLoot> xp;
+    LinkedHashMap<String, MoneyLoot> money;
+    LinkedHashMap<String, ItemLoot> items;
+    LinkedHashMap<String, CommandLoot> commands;
+    LinkedHashMap<String, LootCollection> collections;
     private transient String path;
-    private int minRollAmountXP;
-    private int maxRollAmountXP;
-    private int minRollAmountMoney;
-    private int maxRollAmountMoney;
-    private int minRollAmountItems;
-    private int maxRollAmountItems;
-    private int minRollAmountCommands;
-    private int maxRollAmountCommands;
-    private int minRollAmountCollections;
-    private int maxRollAmountCollections;
-    private LinkedHashMap<String, XPLoot> xp;
-    private LinkedHashMap<String, MoneyLoot> money;
-    private LinkedHashMap<String, ItemLoot> items;
-    private LinkedHashMap<String, CommandLoot> commands;
-    private LinkedHashMap<String, LootCollection> collections;
     
     public LootCollection(String name, double probability) {
         super(name, probability);
@@ -139,14 +139,6 @@ public class LootCollection extends LootObject {
             }
             
         }
-    }
-    
-    public String getPath() {
-        return path;
-    }
-    
-    public void setPath(String path) {
-        this.path = path;
     }
     
     public int getMinRollAmountXP() {
@@ -282,5 +274,13 @@ public class LootCollection extends LootObject {
     
     public void setCommands(LinkedHashMap<String, CommandLoot> commands) {
         this.commands = commands;
+    }
+    
+    public String getPath() {
+        return path;
+    }
+    
+    public void setPath(String path) {
+        this.path = path;
     }
 }

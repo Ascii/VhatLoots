@@ -18,7 +18,7 @@
 
 package de.articdive.vhatloots.events;
 
-import de.articdive.vhatloots.configuration.loot.objects.LootConfiguration;
+import de.articdive.vhatloots.configuration.loot.LootConfiguration;
 import de.articdive.vhatloots.events.abstractions.LootEvent;
 import de.articdive.vhatloots.events.objects.LootBundle;
 import de.articdive.vhatloots.objects.LootContainer;

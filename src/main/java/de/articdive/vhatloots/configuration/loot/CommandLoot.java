@@ -16,7 +16,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package de.articdive.vhatloots.configuration.loot.objects;
+package de.articdive.vhatloots.configuration.loot;
 
 import de.articdive.vhatloots.events.objects.LootBundle;
 

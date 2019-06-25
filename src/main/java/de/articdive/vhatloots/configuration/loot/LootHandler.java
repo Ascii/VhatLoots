@@ -22,9 +22,6 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.reflect.TypeToken;
 import de.articdive.vhatloots.VhatLoots;
-import de.articdive.vhatloots.configuration.loot.objects.LootCollection;
-import de.articdive.vhatloots.configuration.loot.objects.LootConfiguration;
-import de.articdive.vhatloots.configuration.loot.objects.LootObject;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -50,6 +47,7 @@ public class LootHandler {
     private final Gson gson = new GsonBuilder()
             .serializeNulls()
             .setPrettyPrinting()
+            .setLenient()
             .create();
     private final File lootFile = new File(main.getDataFolder() + File.separator + "loot.json");
     private Map<String, LootConfiguration> loot = new HashMap<>();
@@ -98,35 +96,30 @@ public class LootHandler {
                 lootConfigurations = new ArrayList<>();
             }
             reader.close();
-            HashMap<String, LootConfiguration> newLoot = new HashMap<>();
             for (LootConfiguration lootConfiguration : lootConfigurations) {
-                newLoot.put(lootConfiguration.getName(), lootConfiguration);
-                LootCollection rootCollection = lootConfiguration.getLoot();
-                String name = lootConfiguration.getName();
-                lootConfiguration.addCollectionPath(name, rootCollection);
-                rootCollection.setName(name);
-                rootCollection.setPath(name);
-                updateNestedObjects(rootCollection.getXp());
-                updateNestedObjects(rootCollection.getMoney());
-                updateNestedObjects(rootCollection.getItems());
-                updateNestedObjects(rootCollection.getCommands());
-                updateNestedCollections(rootCollection.getCollections(), name, lootConfiguration);
+                loot.put(lootConfiguration.getName(), lootConfiguration);
+                updateNestedObjects(lootConfiguration.getXp(), lootConfiguration, lootConfiguration);
+                updateNestedObjects(lootConfiguration.getMoney(), lootConfiguration, lootConfiguration);
+                updateNestedObjects(lootConfiguration.getItems(), lootConfiguration, lootConfiguration);
+                updateNestedObjects(lootConfiguration.getCommands(), lootConfiguration, lootConfiguration);
+                updateNestedCollections(lootConfiguration.getCollections(), lootConfiguration, lootConfiguration.getName(), lootConfiguration);
             }
-            this.loot = newLoot;
         } catch (IOException e) {
             e.printStackTrace();
         }
     }
     
-    private void updateNestedObjects(LinkedHashMap<String, ? extends LootObject> lootObjectMap) {
+    private void updateNestedObjects(LinkedHashMap<String, ? extends LootObject> lootObjectMap, LootCollection parentCollection, LootConfiguration lootConfiguration) {
         List<String> keys = new ArrayList<>(lootObjectMap.keySet());
         for (int i = 0; i < lootObjectMap.size(); i++) {
             LootObject lootObject = lootObjectMap.values().toArray(new LootObject[0])[i];
             lootObject.setName(keys.get(i));
+            lootObject.setRoot(lootConfiguration);
+            lootObject.setParent(parentCollection);
         }
     }
     
-    private void updateNestedCollections(LinkedHashMap<String, LootCollection> collectionMap, String root, LootConfiguration lootConfiguration) {
+    private void updateNestedCollections(LinkedHashMap<String, LootCollection> collectionMap, LootCollection parentCollection, String root, LootConfiguration lootConfiguration) {
         List<String> keys = new ArrayList<>(collectionMap.keySet());
         for (int i = 0; i < collectionMap.size(); i++) {
             String name = keys.get(i);
@@ -135,14 +128,18 @@ public class LootHandler {
             if (root.isEmpty()) {
                 fullPath = fullPath.substring(1);
             }
-            LootCollection collection = collectionMap.values().toArray(new LootCollection[0])[i];
-            lootConfiguration.addCollectionPath(fullPath, collection);
-            collection.setName(name);
-            collection.setPath(fullPath);
-            updateNestedObjects(collection.getXp());
-            updateNestedObjects(collection.getMoney());
-            updateNestedObjects(collection.getItems());
-            updateNestedCollections(collection.getCollections(), fullPath, lootConfiguration);
+            LootCollection lootCollection = collectionMap.values().toArray(new LootCollection[0])[i];
+            lootConfiguration.addCollectionPath(name, lootCollection);
+            
+            lootCollection.setName(name);
+            lootCollection.setPath(fullPath);
+            lootCollection.setRoot(lootConfiguration);
+            lootCollection.setParent(parentCollection);
+            
+            updateNestedObjects(lootCollection.getXp(), lootCollection, lootConfiguration);
+            updateNestedObjects(lootCollection.getMoney(), lootCollection, lootConfiguration);
+            updateNestedObjects(lootCollection.getItems(), lootCollection, lootConfiguration);
+            updateNestedCollections(lootCollection.getCollections(), lootCollection, name, lootConfiguration);
         }
     }
     

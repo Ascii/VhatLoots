@@ -23,12 +23,12 @@ import co.aikar.commands.MessageType;
 import co.aikar.commands.PaperCommandManager;
 import de.articdive.vhatloots.VhatLoots;
 import de.articdive.vhatloots.configuration.loot.LootHandler;
-import de.articdive.vhatloots.configuration.loot.objects.CommandLoot;
-import de.articdive.vhatloots.configuration.loot.objects.ItemLoot;
-import de.articdive.vhatloots.configuration.loot.objects.LootCollection;
-import de.articdive.vhatloots.configuration.loot.objects.LootConfiguration;
-import de.articdive.vhatloots.configuration.loot.objects.MoneyLoot;
-import de.articdive.vhatloots.configuration.loot.objects.XPLoot;
+import de.articdive.vhatloots.configuration.loot.CommandLoot;
+import de.articdive.vhatloots.configuration.loot.ItemLoot;
+import de.articdive.vhatloots.configuration.loot.LootCollection;
+import de.articdive.vhatloots.configuration.loot.LootConfiguration;
+import de.articdive.vhatloots.configuration.loot.MoneyLoot;
+import de.articdive.vhatloots.configuration.loot.XPLoot;
 import de.articdive.vhatloots.language.Language;
 import de.articdive.vhatloots.language.LanguageHandler;
 import de.articdive.vhatloots.objects.LootContainer;
@@ -40,6 +40,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 /**
@@ -100,7 +101,11 @@ public class CommandHandler {
         manager.getCommandCompletions().registerCompletion("loot-collections",
                 c -> {
                     List<String> output = new ArrayList<>();
-                    lootHandler.getAll().stream().map(configuration -> configuration.getLootPaths().keySet()).forEach(output::addAll);
+                    List<LootConfiguration> all = lootHandler.getAll();
+                    all.forEach(lootConfiguration -> {
+                        output.add(lootConfiguration.getName());
+                        output.addAll(lootConfiguration.getLootPaths().keySet());
+                    });
                     return output;
                 });
         manager.getCommandContexts().registerContext(LootCollection.class,
@@ -108,7 +113,7 @@ public class CommandHandler {
                     String arg = c.popFirstArg();
                     String[] splitPath = arg.split("\\.");
                     if (splitPath.length == 1) {
-                        return lootHandler.get(arg).getLoot();
+                        return lootHandler.get(arg);
                     } else {
                         return lootHandler.get(splitPath[0]).getLootPaths().get(arg);
                     }
@@ -246,5 +251,9 @@ public class CommandHandler {
             instance = new CommandHandler();
         }
         return instance;
+    }
+    
+    private static Set<String> apply(LootConfiguration configuration) {
+        return configuration.getLootPaths().keySet();
     }
 }

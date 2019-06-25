@@ -27,12 +27,12 @@ import co.aikar.commands.annotation.Description;
 import co.aikar.commands.annotation.HelpCommand;
 import co.aikar.commands.annotation.Subcommand;
 import co.aikar.commands.annotation.Syntax;
+import de.articdive.vhatloots.configuration.loot.ItemLoot;
+import de.articdive.vhatloots.configuration.loot.LootCollection;
+import de.articdive.vhatloots.configuration.loot.LootConfiguration;
 import de.articdive.vhatloots.configuration.loot.LootHandler;
-import de.articdive.vhatloots.configuration.loot.objects.ItemLoot;
-import de.articdive.vhatloots.configuration.loot.objects.LootCollection;
-import de.articdive.vhatloots.configuration.loot.objects.LootConfiguration;
-import de.articdive.vhatloots.configuration.loot.objects.MoneyLoot;
-import de.articdive.vhatloots.configuration.loot.objects.XPLoot;
+import de.articdive.vhatloots.configuration.loot.MoneyLoot;
+import de.articdive.vhatloots.configuration.loot.XPLoot;
 import de.articdive.vhatloots.helpers.MessageHelper;
 import de.articdive.vhatloots.language.LanguageConfigurationNode;
 import de.articdive.vhatloots.objects.LootContainer;
@@ -71,7 +71,7 @@ public class LootCommand extends VhatLootsBaseCommand {
             sender.sendMessage(formatMsg(localPlaceHolders, getMessage(sender, LanguageConfigurationNode.LOOT_EXISTS)));
             return;
         }
-        lootHandler.addLootConfiguration(new LootConfiguration(lootName));
+        lootHandler.addLootConfiguration(new LootConfiguration(lootName, 100));
         lootHandler.update(true);
         sender.sendMessage(formatMsg(localPlaceHolders, getMessage(sender, LanguageConfigurationNode.LOOT_CREATED)));
     }
@@ -217,6 +217,7 @@ public class LootCommand extends VhatLootsBaseCommand {
             }
             HashMap<String, Object> localPlaceHolders = new HashMap<>();
             localPlaceHolders.put("collectionName", lootCollection.getName());
+            localPlaceHolders.put("collectionPath", lootCollection.getPath());
             localPlaceHolders.put("xpName", xpName);
             localPlaceHolders.put("probability", probability);
             localPlaceHolders.put("range", low + " - " + high);
@@ -233,11 +234,12 @@ public class LootCommand extends VhatLootsBaseCommand {
         }
         
         @Subcommand("set")
-        @Syntax("<lootName> <moneyName> <option> <value>")
+        @Syntax("<collectionName> <xpName> <option> <value>")
         @CommandCompletion("@loot-collections @loot-xp @xp-options *")
         public void onXPSet(CommandSender sender, LootCollection lootCollection, XPLoot xp, String option, String value) {
             HashMap<String, Object> localPlaceHolders = new HashMap<>();
             localPlaceHolders.put("collectionName", lootCollection.getName());
+            localPlaceHolders.put("collectionPath", lootCollection.getPath());
             localPlaceHolders.put("moneyName", xp.getName());
             localPlaceHolders.put("option", option.toLowerCase());
             switch (option.toLowerCase()) {
@@ -290,13 +292,14 @@ public class LootCommand extends VhatLootsBaseCommand {
             sender.sendMessage(formatMsg(localPlaceHolders, getMessage(sender, LanguageConfigurationNode.LOOT_XP_SET)));
         }
         
-        @Subcommand("remove")
-        @Syntax("<lootName> <xpName> ")
+        @Subcommand("delete|remove")
+        @Syntax("<collectionName> <xpName> ")
         @CommandCompletion("@loot-collections @loot-xp")
-        public void onXPRemove(CommandSender sender, LootCollection lootCollection, XPLoot xp) {
+        public void onXPDelete(CommandSender sender, LootCollection lootCollection, XPLoot xp) {
             HashMap<String, Object> localPlaceHolders = new HashMap<>();
             localPlaceHolders.put("xpName", xp.getName());
             localPlaceHolders.put("collectionName", lootCollection.getName());
+            localPlaceHolders.put("collectionPath", lootCollection.getPath());
             
             lootCollection.getXp().remove(xp.getName());
             lootHandler.update();
@@ -318,6 +321,7 @@ public class LootCommand extends VhatLootsBaseCommand {
             HashMap<String, Object> localPlaceHolders = new HashMap<>();
             localPlaceHolders.put("page", page);
             localPlaceHolders.put("collectionName", lootCollection.getName());
+            localPlaceHolders.put("collectionPath", lootCollection.getPath());
             localPlaceHolders.put("maxPage", maxPage);
             
             List<XPLoot> vals = new ArrayList<>(xpmap.values());
@@ -344,7 +348,7 @@ public class LootCommand extends VhatLootsBaseCommand {
     public class Money extends VhatLootsBaseCommand {
         
         @Subcommand("add")
-        @Syntax("<lootName> <moneyName> <low> <high> <probability>")
+        @Syntax("<collectionName> <moneyName> <low> <high> <probability>")
         @CommandCompletion("@loot-collections * * * *")
         public void onMoneyAdd(CommandSender sender, LootCollection lootCollection, String moneyName, int low, int high, double probability) {
             if (low > high) {
@@ -356,6 +360,7 @@ public class LootCommand extends VhatLootsBaseCommand {
             localPlaceHolders.put("lootName", lootCollection.getName());
             localPlaceHolders.put("moneyName", moneyName);
             localPlaceHolders.put("collectionName", lootCollection.getName());
+            localPlaceHolders.put("collectionPath", lootCollection.getPath());
             localPlaceHolders.put("probability", probability);
             localPlaceHolders.put("range", low + " - " + high);
             
@@ -371,11 +376,12 @@ public class LootCommand extends VhatLootsBaseCommand {
         }
         
         @Subcommand("set")
-        @Syntax("<lootName> <moneyName> <option> <value>")
+        @Syntax("<collectionName> <moneyName> <option> <value>")
         @CommandCompletion("@loot-collections @loot-money @money-options *")
         public void onMoneySet(CommandSender sender, LootCollection lootCollection, MoneyLoot money, String option, String value) {
             HashMap<String, Object> localPlaceHolders = new HashMap<>();
             localPlaceHolders.put("collectionName", lootCollection.getName());
+            localPlaceHolders.put("collectionPath", lootCollection.getPath());
             localPlaceHolders.put("moneyName", money.getName());
             localPlaceHolders.put("option", option.toLowerCase());
             switch (option.toLowerCase()) {
@@ -428,12 +434,13 @@ public class LootCommand extends VhatLootsBaseCommand {
             sender.sendMessage(formatMsg(localPlaceHolders, getMessage(sender, LanguageConfigurationNode.LOOT_MONEY_SET)));
         }
         
-        @Subcommand("remove")
-        @Syntax("<lootName> <moneyName>")
+        @Subcommand("delete|remove")
+        @Syntax("<collectionName> <moneyName>")
         @CommandCompletion("@loot-collections @loot-money")
-        public void onMoneyRemove(CommandSender sender, LootCollection lootCollection, MoneyLoot money) {
+        public void onMoneyDelete(CommandSender sender, LootCollection lootCollection, MoneyLoot money) {
             HashMap<String, Object> localPlaceHolders = new HashMap<>();
             localPlaceHolders.put("collectionName", lootCollection.getName());
+            localPlaceHolders.put("collectionPath", lootCollection.getPath());
             localPlaceHolders.put("moneyName", money.getName());
             lootCollection.getMoney().remove(money.getName());
             lootHandler.update();
@@ -456,6 +463,7 @@ public class LootCommand extends VhatLootsBaseCommand {
             localPlaceHolders.put("page", page);
             localPlaceHolders.put("lootName", lootCollection.getName());
             localPlaceHolders.put("collectionName", lootCollection.getName());
+            localPlaceHolders.put("collectionPath", lootCollection.getPath());
             localPlaceHolders.put("maxPage", maxPage);
             
             List<MoneyLoot> vals = new ArrayList<>(moneymap.values());
@@ -480,13 +488,13 @@ public class LootCommand extends VhatLootsBaseCommand {
     @Subcommand("item")
     @CommandPermission("vhatloots.create")
     public class Item extends VhatLootsBaseCommand {
-        
         @Subcommand("add")
-        @Syntax("<lootName> <itemName> <probability>")
+        @Syntax("<collectionName> <itemName> <probability>")
         @CommandCompletion("@loot-collections * * ")
         public void onItemAdd(Player player, LootCollection lootCollection, String itemName, double probability) {
             HashMap<String, Object> localPlaceHolders = new HashMap<>();
             localPlaceHolders.put("collectionName", lootCollection.getName());
+            localPlaceHolders.put("collectionPath", lootCollection.getPath());
             localPlaceHolders.put("itemName", itemName);
             localPlaceHolders.put("probability", probability);
             
@@ -508,6 +516,7 @@ public class LootCommand extends VhatLootsBaseCommand {
         public void onItemSet(CommandSender sender, LootCollection lootCollection, ItemLoot item, String option, String value) {
             HashMap<String, Object> localPlaceHolders = new HashMap<>();
             localPlaceHolders.put("collectionName", lootCollection.getName());
+            localPlaceHolders.put("collectionPath", lootCollection.getPath());
             localPlaceHolders.put("itemName", item.getName());
             localPlaceHolders.put("option", option.toLowerCase());
             switch (option.toLowerCase()) {
@@ -557,12 +566,13 @@ public class LootCommand extends VhatLootsBaseCommand {
             sender.sendMessage(formatMsg(localPlaceHolders, getMessage(sender, LanguageConfigurationNode.LOOT_ITEM_SET)));
         }
         
-        @Subcommand("remove")
-        @Syntax("<lootName> <itemName>")
+        @Subcommand("delete|remove")
+        @Syntax("<collectionName> <itemName>")
         @CommandCompletion("@loot-collections @loot-items")
-        public void onItemRemove(CommandSender sender, LootCollection lootCollection, ItemLoot item) {
+        public void onItemDelete(CommandSender sender, LootCollection lootCollection, ItemLoot item) {
             HashMap<String, Object> localPlaceHolders = new HashMap<>();
             localPlaceHolders.put("collectionName", lootCollection.getName());
+            localPlaceHolders.put("collectionPath", lootCollection.getPath());
             localPlaceHolders.put("itemName", item.getName());
             
             lootCollection.getItems().remove(item.getName());
@@ -571,7 +581,7 @@ public class LootCommand extends VhatLootsBaseCommand {
         }
         
         @Subcommand("list")
-        @Syntax("<lootName> <page>")
+        @Syntax("<collectionName> <page>")
         @CommandCompletion("@loot-collections *")
         public void onItemList(CommandSender sender, LootCollection lootCollection, @Default("1") int page) {
             if (page == 0) {
@@ -586,6 +596,7 @@ public class LootCommand extends VhatLootsBaseCommand {
             localPlaceHolders.put("page", page);
             localPlaceHolders.put("lootName", lootCollection.getName());
             localPlaceHolders.put("collectionName", lootCollection.getName());
+            localPlaceHolders.put("collectionPath", lootCollection.getPath());
             localPlaceHolders.put("maxPage", maxPage);
             
             List<ItemLoot> vals = new ArrayList<>(xpmap.values());
@@ -623,31 +634,31 @@ public class LootCommand extends VhatLootsBaseCommand {
         @Subcommand("add")
         @Syntax("<lootName> <collectionPath> <probability>")
         @CommandCompletion("@loot-configurations * *")
-        public void onCollectionAdd(CommandSender sender, LootConfiguration lootConfiguration, String collectionName, double probability) {
+        public void onCollectionAdd(CommandSender sender, LootConfiguration lootConfiguration, String collectionPath, double probability) {
             HashMap<String, Object> localPlaceHolders = new HashMap<>();
             localPlaceHolders.put("lootName", lootConfiguration.getName());
-            while (collectionName.startsWith(".")) {
-                collectionName = collectionName.substring(1);
+            while (collectionPath.startsWith(".")) {
+                collectionPath = collectionPath.substring(1);
             }
-            while (collectionName.endsWith(".")) {
-                collectionName = collectionName.substring(0, collectionName.length() - 1);
+            while (collectionPath.endsWith(".")) {
+                collectionPath = collectionPath.substring(0, collectionPath.length() - 1);
             }
-            localPlaceHolders.put("collectionName", collectionName);
+            localPlaceHolders.put("collectionPath", collectionPath);
             localPlaceHolders.put("probability", probability);
             
             HashMap<String, LootCollection> lootCollectionPaths = lootConfiguration.getLootPaths();
-            if (lootCollectionPaths.containsKey(collectionName)) {
+            if (lootCollectionPaths.containsKey(collectionPath)) {
                 sender.sendMessage(formatMsg(localPlaceHolders, getMessage(sender, LanguageConfigurationNode.LOOT_COLLECTION_EXISTS)));
                 return;
             }
-            LinkedHashMap<String, LootCollection> collections = lootConfiguration.getLoot().getCollections();
-            String[] parts = collectionName.split("\\.");
-            LootCollection newCollection = new LootCollection(collectionName, probability);
+            LinkedHashMap<String, LootCollection> collections = lootConfiguration.getCollections();
+            String[] parts = collectionPath.split("\\.");
+            LootCollection newCollection = new LootCollection(collectionPath, probability);
             if (parts.length == 1) {
-                collections.put(collectionName, newCollection);
-                lootCollectionPaths.put(lootConfiguration.getName() + "." + collectionName, newCollection);
+                collections.put(collectionPath, newCollection);
+                lootCollectionPaths.put(lootConfiguration.getName() + "." + collectionPath, newCollection);
                 
-                lootConfiguration.getLoot().setCollections(collections);
+                lootConfiguration.setCollections(collections);
                 lootConfiguration.setLootPaths(lootCollectionPaths);
             } else {
                 StringBuilder parentPath = new StringBuilder(parts[0]);
@@ -656,14 +667,15 @@ public class LootCommand extends VhatLootsBaseCommand {
                 }
                 LootCollection parentCollection = lootCollectionPaths.get(lootConfiguration.getName() + "." + parentPath.toString());
                 if (parentCollection == null) {
-                    localPlaceHolders.put("parentCollectionName", parentPath.toString());
+                    localPlaceHolders.put("parentCollectionName", parts[parts.length - 2]);
+                    localPlaceHolders.put("parentCollectionPath", parentPath.toString());
                     sender.sendMessage(formatMsg(localPlaceHolders, getMessage(sender, LanguageConfigurationNode.LOOT_COLLECTION_PARENT_DOESNT_EXIST)));
                     return;
                 } else {
                     LinkedHashMap<String, LootCollection> parentCollections = parentCollection.getCollections();
                     
                     parentCollections.put(parts[parts.length - 1], newCollection);
-                    lootCollectionPaths.put(lootConfiguration.getName() + "." + collectionName, newCollection);
+                    lootCollectionPaths.put(lootConfiguration.getName() + "." + collectionPath, newCollection);
                     
                     parentCollection.setCollections(parentCollections);
                     lootConfiguration.setLootPaths(lootCollectionPaths);
@@ -674,12 +686,12 @@ public class LootCommand extends VhatLootsBaseCommand {
         }
         
         @Subcommand("set")
-        @Syntax("<lootName> <collectionPath> <option> <value>")
-        @CommandCompletion("@loot-configurations @loot-collections @collection-options *")
-        public void onCollectionSet(CommandSender sender, LootConfiguration lootConfiguration, LootCollection lootCollection, String option, String value) {
+        @Syntax("<collectionName> <option> <value>")
+        @CommandCompletion("@loot-collections @collection-options *")
+        public void onCollectionSet(CommandSender sender, LootCollection lootCollection, String option, String value) {
             HashMap<String, Object> localPlaceHolders = new HashMap<>();
-            localPlaceHolders.put("collectionName", lootCollection.getName());
-            localPlaceHolders.put("lootName", lootConfiguration.getName());
+            localPlaceHolders.put("collectionName", lootCollection.getPath());
+            localPlaceHolders.put("collectionPath", lootCollection.getPath());
             localPlaceHolders.put("option", option.toLowerCase());
             switch (option.toLowerCase()) {
                 case "c":
@@ -696,8 +708,8 @@ public class LootCommand extends VhatLootsBaseCommand {
                         return;
                     }
                 }
-                case "minRollXP":
-                case "minRollAmountXP": {
+                case "minrollxp":
+                case "minrollamountxp": {
                     try {
                         int minRollAmountXP = Integer.valueOf(value);
                         localPlaceHolders.put("value", minRollAmountXP);
@@ -708,8 +720,8 @@ public class LootCommand extends VhatLootsBaseCommand {
                         return;
                     }
                 }
-                case "maxRollXP":
-                case "maxRollAmountXP": {
+                case "maxrollxp":
+                case "maxrollamountxp": {
                     try {
                         int maxRollAmountXP = Integer.valueOf(value);
                         localPlaceHolders.put("value", maxRollAmountXP);
@@ -720,8 +732,8 @@ public class LootCommand extends VhatLootsBaseCommand {
                         return;
                     }
                 }
-                case "minRollMoney":
-                case "minRollAmountMoney": {
+                case "minrollmoney":
+                case "minrollamountmoney": {
                     try {
                         int minRollAmountMoney = Integer.valueOf(value);
                         localPlaceHolders.put("value", minRollAmountMoney);
@@ -732,8 +744,8 @@ public class LootCommand extends VhatLootsBaseCommand {
                         return;
                     }
                 }
-                case "maxRollMoney":
-                case "maxRollAmountMoney": {
+                case "maxrollmoney":
+                case "maxrollamountmoney": {
                     try {
                         int maxRollAmountMoney = Integer.valueOf(value);
                         localPlaceHolders.put("value", maxRollAmountMoney);
@@ -744,8 +756,8 @@ public class LootCommand extends VhatLootsBaseCommand {
                         return;
                     }
                 }
-                case "minRollItems":
-                case "minRollAmountItems": {
+                case "minrollitems":
+                case "minrollamountitems": {
                     try {
                         int minRollAmountItems = Integer.valueOf(value);
                         localPlaceHolders.put("value", minRollAmountItems);
@@ -756,8 +768,8 @@ public class LootCommand extends VhatLootsBaseCommand {
                         return;
                     }
                 }
-                case "maxRollItems":
-                case "maxRollAmountItems": {
+                case "maxrollitems":
+                case "maxrollamountitems": {
                     try {
                         int maxRollAmountItems = Integer.valueOf(value);
                         localPlaceHolders.put("value", maxRollAmountItems);
@@ -768,8 +780,8 @@ public class LootCommand extends VhatLootsBaseCommand {
                         return;
                     }
                 }
-                case "minRollCommands":
-                case "minRollAmountCommands": {
+                case "minrollcommands":
+                case "minrollamountcommands": {
                     try {
                         int minRollAmountCommands = Integer.valueOf(value);
                         localPlaceHolders.put("value", minRollAmountCommands);
@@ -780,8 +792,8 @@ public class LootCommand extends VhatLootsBaseCommand {
                         return;
                     }
                 }
-                case "maxRollCommands":
-                case "maxRollAmountCommands": {
+                case "maxrollcommands":
+                case "maxrollamountcommands": {
                     try {
                         int maxRollAmountCommands = Integer.valueOf(value);
                         localPlaceHolders.put("value", maxRollAmountCommands);
@@ -792,8 +804,8 @@ public class LootCommand extends VhatLootsBaseCommand {
                         return;
                     }
                 }
-                case "minRollCollections":
-                case "minRollAmountCollections": {
+                case "minrollcollections":
+                case "minrollamountcollections": {
                     try {
                         int minRollAmountCollections = Integer.valueOf(value);
                         localPlaceHolders.put("value", minRollAmountCollections);
@@ -804,8 +816,8 @@ public class LootCommand extends VhatLootsBaseCommand {
                         return;
                     }
                 }
-                case "maxRollCollections":
-                case "maxRollAmountCollections": {
+                case "maxrollcollections":
+                case "maxrollamountcollections": {
                     try {
                         int maxRollAmountCollections = Integer.valueOf(value);
                         localPlaceHolders.put("value", maxRollAmountCollections);
@@ -825,8 +837,22 @@ public class LootCommand extends VhatLootsBaseCommand {
             sender.sendMessage(formatMsg(localPlaceHolders, getMessage(sender, LanguageConfigurationNode.LOOT_COLLECTION_SET)));
         }
         
-        public void onCollectionRemove(CommandSender sender, LootConfiguration lootConfiguration, LootCollection collection) {
-            
+        @Subcommand("delete|remove")
+        @Syntax("<collectionName> <itemName>")
+        @CommandCompletion("@loot-collections @loot-items")
+        public void onCollectionDelete(CommandSender sender, LootCollection lootCollection) {
+            HashMap<String, Object> localPlaceHolders = new HashMap<>();
+            localPlaceHolders.put("lootName", lootCollection.getRoot().getName());
+            localPlaceHolders.put("collectionName", lootCollection.getName());
+            localPlaceHolders.put("collectionPath", lootCollection.getPath());
+            LootCollection parentCollection = lootCollection.getParent();
+            if (parentCollection == null) {
+                onDelete(sender, (LootConfiguration) lootCollection);
+            } else {
+                LinkedHashMap<String, LootCollection> parentCollections = parentCollection.getCollections();
+                parentCollections.remove(lootCollection.getName());
+                sender.sendMessage(formatMsg(localPlaceHolders, getMessage(sender, LanguageConfigurationNode.LOOT_COLLECTION_DELETED)));
+            }
         }
     }
 }
